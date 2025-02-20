@@ -8,7 +8,6 @@ import {
   Code2, 
   Search, 
   Palette,
-  Calendar,
 } from 'lucide-react';
 import ContactForm from '@/components/ContactForm';
 import { Metadata } from "next";
