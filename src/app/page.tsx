@@ -419,8 +419,8 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Blog Section - Hidden on mobile */}
-        <section className="hidden md:block py-12 sm:py-16 md:py-20 px-4 bg-[#0d1424] relative overflow-hidden">
+        {/* Blog Section - Hidden only on small devices (below 640px) */}
+        <section className="hidden sm:block py-12 sm:py-16 md:py-20 px-4 bg-[#0d1424] relative overflow-hidden">
           <div className="max-w-[90%] md:max-w-6xl mx-auto">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 md:mb-16 
               bg-gradient-to-r from-teal-300 to-blue-400 bg-clip-text text-transparent">
@@ -429,14 +429,36 @@ export default async function Home() {
             
             {/* Blog Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {blogs.slice(0, 3).map((blog) => (
+              {blogs?.slice(0, 3).map((blog) => (
                 <Link 
                   key={blog.id}
                   href={`/blog/${blog.slug}`}
                   className="w-full group relative bg-[#0d1424]/80 rounded-xl overflow-hidden 
                     border border-teal-500/20 hover:border-teal-500/40 transition-all duration-300"
                 >
-                  {/* Blog card content remains the same */}
+                  {/* Image Container */}
+                  <div className="relative h-48 sm:h-56">
+                    <Image
+                      src={blog.image_url}
+                      alt={blog.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 sm:p-6">
+                    <time className="text-teal-400 text-sm mb-2 block">
+                      {new Date(blog.published_at).toLocaleDateString()}
+                    </time>
+                    <h3 className="text-lg font-bold mb-2 text-white group-hover:text-teal-400 
+                      transition-colors line-clamp-2">
+                      {blog.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm line-clamp-3">
+                      {blog.content.slice(0, 150)}...
+                    </p>
+                  </div>
                 </Link>
               ))}
             </div>
