@@ -2,18 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
-
-// Dynamically import reCAPTCHA only when needed
-const ReCAPTCHA = dynamic(() => import('react-google-recaptcha'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-20 bg-[#0d2231]/30 rounded-lg animate-pulse flex items-center justify-center">
-      <span className="text-gray-400 text-sm">Loading security verification...</span>
-    </div>
-  )
-});
 
 interface Service {
   id: string;
@@ -26,14 +15,20 @@ export default function ContactForm() {
     name: '',
     email: '',
     subject: 'General/Other Enquiries',
-    message: ''
+    message: '',
+    preferred_contact_time: '',
+    preferred_contact_method: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
-  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [isLocalhost, setIsLocalhost] = useState(false);
+
+  // Check if running on localhost
+  useEffect(() => {
+    setIsLocalhost(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  }, []);
 
   // Fetch services on component mount
   useEffect(() => {
@@ -57,24 +52,12 @@ export default function ContactForm() {
     fetchServices();
   }, []);
 
-  // Show captcha only when form starts being filled
-  useEffect(() => {
-    if (formData.name || formData.email || formData.message) {
-      setShowCaptcha(true);
-    }
-  }, [formData.name, formData.email, formData.message]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.subject) {
       setFormData({ ...formData, subject: 'General/Other Enquiries' });
     }
     
-    // Only require captcha if reCAPTCHA is configured
-    if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !captchaValue) {
-      alert('Please complete the reCAPTCHA.');
-      return;
-    }
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
@@ -86,7 +69,8 @@ export default function ContactForm() {
         },
         body: JSON.stringify({
           ...formData,
-          captchaValue
+          preferred_contact_time: formData.preferred_contact_time,
+          preferred_contact_method: formData.preferred_contact_method
         }),
       });
 
@@ -95,9 +79,7 @@ export default function ContactForm() {
       }
 
       setSubmitStatus('success');
-      setFormData({ name: '', email: '', subject: 'General/Other Enquiries', message: '' });
-      setCaptchaValue(null);
-      setShowCaptcha(false);
+      setFormData({ name: '', email: '', subject: 'General/Other Enquiries', message: '', preferred_contact_time: '', preferred_contact_method: '' });
     } catch {
       setSubmitStatus('error');
     } finally {
@@ -212,21 +194,60 @@ export default function ContactForm() {
         />
       </div>
 
-      {/* reCAPTCHA - Only load when needed and sitekey is available */}
-      {showCaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-        <div className="transition-all duration-300">
-          <ReCAPTCHA
-            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-            onChange={(value: string | null) => setCaptchaValue(value)}
-          />
+      {/* Contact Preferences */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Preferred Contact Method */}
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500/20 to-blue-500/20 
+            rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 
+            group-hover:duration-200" />
+          <select
+            name="preferred_contact_method"
+            value={formData.preferred_contact_method}
+            onChange={(e) => setFormData({ ...formData, preferred_contact_method: e.target.value })}
+            className="relative w-full px-4 py-3 bg-[#0d2231]/50 rounded-lg 
+              border border-teal-500/20 focus:border-teal-500/50
+              text-gray-300 placeholder-gray-500
+              focus:outline-none focus:ring-2 focus:ring-teal-500/20
+              backdrop-blur-sm transition-all duration-300"
+          >
+            <option value="" className="text-gray-300 bg-[#0d2231]">Preferred Contact Method</option>
+            <option value="Email" className="text-gray-300 bg-[#0d2231]">Email</option>
+            <option value="Phone" className="text-gray-300 bg-[#0d2231]">Phone</option>
+            <option value="WhatsApp" className="text-gray-300 bg-[#0d2231]">WhatsApp</option>
+            <option value="Any" className="text-gray-300 bg-[#0d2231]">Any</option>
+          </select>
         </div>
-      )}
-      
-      {/* Development notice when reCAPTCHA is not configured */}
-      {showCaptcha && !process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
-        <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-          <p className="text-yellow-400 text-sm">
-            ⚠️ reCAPTCHA not configured for development. Form will work without verification.
+
+        {/* Preferred Contact Time */}
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500/20 to-blue-500/20 
+            rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 
+            group-hover:duration-200" />
+          <select
+            name="preferred_contact_time"
+            value={formData.preferred_contact_time}
+            onChange={(e) => setFormData({ ...formData, preferred_contact_time: e.target.value })}
+            className="relative w-full px-4 py-3 bg-[#0d2231]/50 rounded-lg 
+              border border-teal-500/20 focus:border-teal-500/50
+              text-gray-300 placeholder-gray-500
+              focus:outline-none focus:ring-2 focus:ring-teal-500/20
+              backdrop-blur-sm transition-all duration-300"
+          >
+            <option value="" className="text-gray-300 bg-[#0d2231]">Preferred Contact Time</option>
+            <option value="Morning (9AM-12PM)" className="text-gray-300 bg-[#0d2231]">Morning (9AM-12PM)</option>
+            <option value="Afternoon (12PM-5PM)" className="text-gray-300 bg-[#0d2231]">Afternoon (12PM-5PM)</option>
+            <option value="Evening (5PM-8PM)" className="text-gray-300 bg-[#0d2231]">Evening (5PM-8PM)</option>
+            <option value="Anytime" className="text-gray-300 bg-[#0d2231]">Anytime</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Development notice when on localhost */}
+      {isLocalhost && (
+        <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+          <p className="text-green-400 text-sm">
+            🚀 Development Mode: All security features disabled for localhost.
           </p>
         </div>
       )}
@@ -235,7 +256,7 @@ export default function ContactForm() {
       <div className="flex justify-center">
         <button
           type="submit"
-          disabled={isSubmitting || (!showCaptcha && !!(formData.name || formData.email || formData.message))}
+          disabled={isSubmitting}
           className="relative inline-flex items-center px-8 py-4 bg-[#0a0f1a] rounded-xl
             text-lg font-semibold overflow-hidden button-shine group/btn disabled:opacity-50"
         >

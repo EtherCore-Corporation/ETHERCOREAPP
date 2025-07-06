@@ -121,7 +121,7 @@ export default async function Home() {
         />
       ))}
       
-      <main className="min-h-screen w-screen max-w-[100vw] overflow-x-hidden">
+      <main className="min-h-screen w-screen max-w-[100vw]">
         {/* Hero Section */}
         <section className="min-h-screen relative flex flex-col justify-center items-center p-4 md:p-8 w-full">
           <GridBackground />

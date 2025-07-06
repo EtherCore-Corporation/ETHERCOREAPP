@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import PopupContact from "@/components/PopupContact";
 import WhatsappButton from "@/components/WhatsappButton";
 import "./globals.css";
+import Navigation from '@/components/Navigation';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,8 +23,8 @@ const geistMono = Geist_Mono({
 
 // ✅ Enhanced Global metadata with better favicon configuration
 export const metadata: Metadata = {
-  title: "EtherCore - Affordable Digital Solutions",
-  description: "Your Trusted Partner for Affordable Digital Solutions. We specialize in web development, AI automation, and SEO optimization.",
+  title: "EtherCore - Digital Solutions",
+  description: "Professional web development and digital solutions",
   keywords: "web development, AI automation, digital solutions, SEO optimization, blog, services, projects",
   robots: "index, follow",
   alternates: {
@@ -60,7 +61,9 @@ export const viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <head>
@@ -98,11 +101,7 @@ export default function RootLayout({
             }
             /* Performance improvements */
             * {
-              -webkit-transform: translateZ(0);
-              -moz-transform: translateZ(0);
-              -ms-transform: translateZ(0);
-              -o-transform: translateZ(0);
-              transform: translateZ(0);
+              box-sizing: border-box;
             }
           `
         }} />
@@ -132,11 +131,11 @@ export default function RootLayout({
 
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0a0f1a] text-white`}>
-        <NavigationWrapper />
-        {children}
+        <Navigation />
+        <main>{children}</main>
         <Footer />
-        <PopupContact />
         <WhatsappButton variant="fixed" />
+        <PopupContact />
         
         {/* ✅ Optimized Service Worker Registration */}
         <script

@@ -1,371 +1,240 @@
 'use client';
 
-import { useState, useEffect, FormEvent } from 'react';
-import { X, MessageCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import dynamic from 'next/dynamic';
-
-// Dynamically import reCAPTCHA only when needed
-const ReCAPTCHA = dynamic(() => import('react-google-recaptcha'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-16 bg-[#0d2231]/30 rounded-lg animate-pulse flex items-center justify-center">
-      <span className="text-gray-400 text-xs">Loading verification...</span>
-    </div>
-  )
-});
-
-// EtherCore services - fetched dynamically but with fallbacks
-const defaultServices = [
-  'General Inquiry',
-  'Web Development',
-  'AI Automation',
-  'SEO Optimization',
-  'UX/UI Design',
-  'Digital Marketing',
-  'Technical Consulting',
-  'Custom Solutions'
-];
+import { useState, useEffect } from 'react';
+import { MessageSquare, X } from 'lucide-react';
+import ContactForm from './ContactForm';
 
 const PopupContact = () => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [services, setServices] = useState(defaultServices);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-    gdpr: false,
-    service: 'General Inquiry'
-  });
+  const [isOpen, setIsOpen] = useState(false);
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{
-    type: 'success' | 'error' | null;
-    message: string;
-  }>({ type: null, message: '' });
-  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
+  console.log('🔵 PopupContact mounted, isOpen:', isOpen);
 
-  // Fetch services from database
+  // Auto-open functionality
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const { data: servicesData } = await supabase
-          .from('services')
-          .select('name')
-          .eq('is_active', true)
-          .order('created_at', { ascending: true });
+    if (hasAutoOpened) return;
 
-        if (servicesData && servicesData.length > 0) {
-          const serviceNames = ['General Inquiry', ...servicesData.map(s => s.name)];
-          setServices(serviceNames);
-        }
-      } catch (error) {
-        console.error('Error fetching services:', error);
-        // Keep default services if fetch fails
+    let timeoutId: NodeJS.Timeout;
+    let scrollTriggered = false;
+
+    // Function to open popup
+    const openPopup = () => {
+      if (!hasAutoOpened && !isOpen) {
+        console.log('🔵 Auto-opening popup');
+        setIsOpen(true);
+        setHasAutoOpened(true);
       }
     };
 
-    fetchServices();
-  }, []);
+    // Time-based trigger (after 30 seconds)
+    timeoutId = setTimeout(() => {
+      if (!scrollTriggered) {
+        openPopup();
+      }
+    }, 30000);
 
+    // Scroll-based trigger (after scrolling 50% of page height)
+    const handleScroll = () => {
+      if (scrollTriggered || hasAutoOpened) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Trigger when user scrolls 50% of the page
+      const scrollPercentage = (scrollTop + windowHeight) / documentHeight;
+      
+      if (scrollPercentage > 0.5) {
+        scrollTriggered = true;
+        clearTimeout(timeoutId);
+        openPopup();
+      }
+    };
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasAutoOpened, isOpen]);
+
+  // Handle manual trigger via hash or button clicks
   useEffect(() => {
-    // Auto show popup after 10 seconds (less aggressive than 5 seconds)
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 10000);
-    
-    // Listen for clicks on elements with the 'open-popup-contact' class
-    const handleExternalTrigger = (e: MouseEvent) => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#popup-contact') {
+        console.log('🔵 Hash trigger detected');
+        setIsOpen(true);
+        // Remove hash from URL without page reload
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    };
+
+    // Handle custom openPopup event
+    const handleOpenPopup = () => {
+      console.log('🔵 Custom openPopup event detected');
+      setIsOpen(true);
+    };
+
+    // Handle custom triggerPopup event
+    const handleTriggerPopup = (e: CustomEvent) => {
+      console.log('🔵 triggerPopup event detected from:', e.detail?.source);
+      setIsOpen(true);
+    };
+
+    // Check initial hash
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Listen for custom openPopup event
+    window.addEventListener('openPopup', handleOpenPopup);
+
+    // Listen for new triggerPopup event
+    window.addEventListener('triggerPopup', handleTriggerPopup as EventListener);
+
+    // Listen for click events on trigger buttons
+    const handleTriggerClick = (e: Event) => {
       const target = e.target as HTMLElement;
-      const triggerElement = target.closest('.open-popup-contact');
+      console.log('🔵 Click detected on:', target.tagName, target.className);
+      
+      // Check if clicked element or any parent has the trigger
+      const triggerElement = target.closest('.open-popup-contact') || target.closest('a[href="#popup-contact"]');
       
       if (triggerElement) {
         e.preventDefault();
-        e.stopPropagation();
-        setIsVisible(true);
-        setIsMinimized(false);
+        console.log('🔵 Popup trigger found!', triggerElement);
+        setIsOpen(true);
+      } else {
+        console.log('🔵 No popup trigger found');
       }
     };
-    
-    document.addEventListener('click', handleExternalTrigger, true);
 
-    const setupContactLinks = () => {
-      const contactLinks = document.querySelectorAll('.open-popup-contact');
-      contactLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          setIsVisible(true);
-          setIsMinimized(false);
-        });
-      });
-    };
-
-    setupContactLinks();
-    const observer = new MutationObserver(setupContactLinks);
-    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('click', handleTriggerClick);
 
     return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handleExternalTrigger, true);
-      observer.disconnect();
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('openPopup', handleOpenPopup);
+      window.removeEventListener('triggerPopup', handleTriggerPopup as EventListener);
+      document.removeEventListener('click', handleTriggerClick);
     };
   }, []);
 
-  const handleToggle = () => {
-    setIsMinimized(!isMinimized);
-  };
-
-  const handleClose = () => {
-    setIsVisible(false);
-  };
-
-  const handleShow = () => {
-    setIsVisible(true);
-    setIsMinimized(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement;
-      setFormData({
-        ...formData,
-        [name]: target.checked
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
-    }
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus({ type: null, message: '' });
-    
-    try {
-      // Verify reCAPTCHA first (only if configured)
-      if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !captchaValue) {
-        throw new Error('Please complete the reCAPTCHA verification.');
-      }
-
-      console.log('Starting form submission...');
-
-      // Send via API endpoint (which handles both database saving and email notification)
-      const apiResponse = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.service,
-          message: `${formData.message}${formData.phone ? `\n\nPhone: ${formData.phone}` : ''}\n\n--- Submitted via Popup Form ---`,
-          captchaValue: captchaValue
-        }),
-      });
-
-      if (!apiResponse.ok) {
-        const errorData = await apiResponse.json();
-        throw new Error(errorData.error || 'Failed to send message');
-      }
-
-      setSubmitStatus({
-        type: 'success',
-        message: 'Message sent successfully! We\'ll get back to you within 24 hours.'
-      });
-      
-      // Reset form and minimize
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        message: '',
-        gdpr: false,
-        service: 'General Inquiry'
-      });
-      setCaptchaValue(null);
-      
-      setIsMinimized(true);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setSubmitStatus({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Error sending message. Please try again later.'
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (!isVisible) {
-    return (
+  return (
+    <>
+      {/* Fixed Contact Button with beautiful aesthetics + working fixed positioning */}
       <div 
-        className="fixed bottom-6 right-6 z-50 cursor-pointer group"
-        onClick={handleShow}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 999999,
+          width: '56px',
+          height: '56px',
+          background: 'linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%)',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 8px 32px rgba(45, 212, 191, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)',
+          cursor: 'pointer',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          border: '2px solid rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(10px)'
+        }}
+        className="hover:scale-110 hover:rotate-3 animate-pulse"
+        onClick={() => {
+          console.log('🔵 Contact button clicked!');
+          setIsOpen(true);
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1) rotate(-3deg)';
+          e.currentTarget.style.boxShadow = '0 12px 40px rgba(45, 212, 191, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(45, 212, 191, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)';
+        }}
+        title="Contact us"
       >
-        <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300" />
-          <div className="relative w-14 h-14 bg-[#0a0f1a] rounded-full flex items-center justify-center border border-teal-500/30 hover:border-teal-500/60 transition-all duration-300">
-            <MessageCircle className="w-6 h-6 text-teal-400" />
+        <MessageSquare 
+          style={{ 
+            width: '28px', 
+            height: '28px', 
+            color: 'white',
+            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+          }} 
+        />
+      </div>
+
+      {/* Popup Modal */}
+      {isOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999999,
+            padding: '16px'
+          }}
+        >
+          <div 
+            style={{
+              backgroundColor: '#0d2231',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '640px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              position: 'relative'
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                console.log('🔵 Close button clicked!');
+                setIsOpen(false);
+              }}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                color: '#9ca3af',
+                cursor: 'pointer',
+                fontSize: '24px'
+              }}
+            >
+              <X style={{ width: '24px', height: '24px' }} />
+            </button>
+
+            {/* Header */}
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+                Get In Touch
+              </h2>
+              <p style={{ color: '#9ca3af' }}>
+                Ready to transform your business? Let's discuss your project.
+              </p>
+            </div>
+
+            {/* Contact Form */}
+            <ContactForm />
           </div>
         </div>
-        <div className="absolute -top-12 right-0 bg-[#0d2231] text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-          Contact Us
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`fixed bottom-6 right-6 z-50 w-80 bg-[#0d2231] rounded-xl shadow-2xl border border-teal-500/20 ${isMinimized ? 'h-14' : 'max-h-[90vh] overflow-y-auto'} transition-all duration-300`}>
-      {/* Header */}
-      <div 
-        className="flex items-center justify-between p-4 cursor-pointer border-b border-teal-500/20"
-        onClick={handleToggle}
-      >
-        <h3 className="text-lg font-semibold text-white">Contact EtherCore</h3>
-        <div className="flex items-center space-x-2">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClose();
-            }}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Body */}
-      {!isMinimized && (
-        <div className="p-4">
-          {submitStatus.type && (
-            <div className={`mb-4 p-3 rounded-lg text-sm ${
-              submitStatus.type === 'success' 
-                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                : 'bg-red-500/20 text-red-400 border border-red-500/30'
-            }`}>
-              {submitStatus.message}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input 
-              type="text" 
-              name="name"
-              placeholder="Full Name" 
-              value={formData.name}
-              onChange={handleChange}
-              required 
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 bg-[#0a0f1a] border border-teal-500/30 rounded-lg text-white placeholder-gray-400 focus:border-teal-500/60 focus:outline-none transition-colors"
-            />
-            
-            <input 
-              type="email" 
-              name="email"
-              placeholder="Email Address" 
-              value={formData.email}
-              onChange={handleChange}
-              required 
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 bg-[#0a0f1a] border border-teal-500/30 rounded-lg text-white placeholder-gray-400 focus:border-teal-500/60 focus:outline-none transition-colors"
-            />
-            
-            <input 
-              type="tel" 
-              name="phone"
-              placeholder="Phone Number (Optional)" 
-              value={formData.phone}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 bg-[#0a0f1a] border border-teal-500/30 rounded-lg text-white placeholder-gray-400 focus:border-teal-500/60 focus:outline-none transition-colors"
-            />
-            
-            <select
-              name="service"
-              value={formData.service}
-              onChange={handleChange}
-              required
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 bg-[#0a0f1a] border border-teal-500/30 rounded-lg text-white focus:border-teal-500/60 focus:outline-none transition-colors"
-            >
-              {services.map(service => (
-                <option key={service} value={service} className="bg-[#0d2231]">
-                  {service}
-                </option>
-              ))}
-            </select>
-            
-            <textarea 
-              name="message"
-              placeholder="How can we help you?" 
-              value={formData.message}
-              onChange={handleChange}
-              required
-              disabled={isSubmitting}
-              rows={3}
-              className="w-full px-3 py-2 bg-[#0a0f1a] border border-teal-500/30 rounded-lg text-white placeholder-gray-400 focus:border-teal-500/60 focus:outline-none transition-colors resize-none"
-            />
-            
-            <div className="flex items-start space-x-2">
-              <input 
-                type="checkbox" 
-                id="popup-gdpr" 
-                name="gdpr"
-                checked={formData.gdpr}
-                onChange={handleChange}
-                required 
-                disabled={isSubmitting}
-                className="mt-1 w-4 h-4 text-teal-500 bg-[#0a0f1a] border border-teal-500/30 rounded focus:ring-teal-500/50"
-              />
-              <label htmlFor="popup-gdpr" className="text-sm text-gray-300">
-                I accept the <a href="/privacy" className="text-teal-400 hover:underline">privacy policy</a> and consent to data processing.
-              </label>
-            </div>
-
-            {/* reCAPTCHA - Only show if configured */}
-            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
-              <div className="flex justify-center">
-                <ReCAPTCHA
-                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                  onChange={(value: string | null) => setCaptchaValue(value)}
-                  theme="dark"
-                  size="compact"
-                />
-              </div>
-            ) : (
-              <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <p className="text-yellow-400 text-xs text-center">
-                  ⚠️ reCAPTCHA not configured for development
-                </p>
-              </div>
-            )}
-            
-            <button 
-              type="submit"
-              disabled={isSubmitting || !formData.gdpr || (!!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !captchaValue)}
-              className="w-full py-2 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg font-semibold hover:from-teal-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-            >
-              {isSubmitting ? 'Sending...' : 'Send Message'}
-            </button>
-            
-            {/* reCAPTCHA Notice */}
-            <div className="text-xs text-gray-500 text-center">
-              Protected by reCAPTCHA
-            </div>
-          </form>
-        </div>
       )}
-    </div>
+    </>
   );
 };
 

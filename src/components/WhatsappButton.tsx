@@ -10,9 +10,11 @@ interface WhatsappButtonProps {
 }
 
 const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) => {
-  const [whatsappNumber, setWhatsappNumber] = useState<string>('447700900123'); // Default fallback number (EtherCore)
+  const [whatsappNumber, setWhatsappNumber] = useState<string>('447700900123');
   
   useEffect(() => {
+    console.log('🟢 WhatsApp Button mounted, variant:', variant);
+    
     async function fetchWhatsappNumber() {
       try {
         const { data, error } = await supabase
@@ -27,13 +29,12 @@ const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) =
         }
         
         if (data && data.phone) {
-          // Format the number: remove spaces and plus sign
           const formattedNumber = data.phone
-            .replace(/\s+/g, '')  // Remove spaces
-            .replace(/^\+/, '');  // Remove leading plus sign if present
+            .replace(/\s+/g, '')
+            .replace(/^\+/, '');
           
           setWhatsappNumber(formattedNumber);
-          console.log('WhatsApp number set to:', formattedNumber); // Debug
+          console.log('WhatsApp number set to:', formattedNumber);
         }
       } catch (error) {
         console.error('Failed to fetch WhatsApp number:', error);
@@ -46,8 +47,7 @@ const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) =
   const messageText = 'Hello! I am interested in your digital solutions and would like to know more about your services. Could you provide me with more information?';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageText)}`;
   
-  // Debug
-  console.log('WhatsApp URL:', whatsappUrl);
+  console.log('🟢 WhatsApp URL:', whatsappUrl);
 
   if (variant === 'navigation') {
     return (
@@ -67,27 +67,50 @@ const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) =
     );
   }
 
-  // Fixed variant (bottom-left)
+  // Fixed variant with beautiful aesthetics + working fixed positioning
   return (
-    <div className="fixed bottom-6 left-6 z-50">
-      <a
-        href={whatsappUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group relative flex items-center justify-center w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
-        title="Contact us on WhatsApp"
-      >
-        <MessageCircle className="w-7 h-7 text-white" />
-        
-        {/* Pulse animation */}
-        <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75"></div>
-        
-        {/* Tooltip */}
-        <div className="absolute left-full ml-3 bg-[#0d2231] text-white px-3 py-2 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-          Chat with us on WhatsApp
-          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-[#0d2231] rotate-45"></div>
-        </div>
-      </a>
+    <div 
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        left: '24px',
+        zIndex: 999999,
+        width: '56px',
+        height: '56px',
+        background: 'linear-gradient(135deg, #25d366 0%, #128c7e 100%)',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 8px 32px rgba(37, 211, 102, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)',
+        cursor: 'pointer',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        border: '2px solid rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)'
+      }}
+      className="hover:scale-110 hover:rotate-3 animate-pulse"
+      onClick={() => {
+        console.log('🟢 WhatsApp button clicked!');
+        window.open(whatsappUrl, '_blank');
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.1) rotate(3deg)';
+        e.currentTarget.style.boxShadow = '0 12px 40px rgba(37, 211, 102, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(37, 211, 102, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)';
+      }}
+      title="Contact us on WhatsApp"
+    >
+      <MessageCircle 
+        style={{ 
+          width: '28px', 
+          height: '28px', 
+          color: 'white',
+          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+        }} 
+      />
     </div>
   );
 };

@@ -6,7 +6,9 @@ interface ContactRequest {
   email: string;
   subject: string;
   message: string;
-  captchaValue: string;
+  captchaValue?: string;
+  preferred_contact_time?: string;
+  preferred_contact_method?: string;
 }
 
 interface ContactResponse {
@@ -19,20 +21,22 @@ export default async function handler(
   res: NextApiResponse<ContactResponse>
 ) {
   if (req.method === 'POST') {
-    const { name, email, subject, message, captchaValue } = req.body as ContactRequest;
+    const { name, email, subject, message, captchaValue, preferred_contact_time, preferred_contact_method } = req.body as ContactRequest;
 
-    // Verify reCAPTCHA
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-    const response = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaValue}`,
-      {
-        method: 'POST',
+    // Verify reCAPTCHA (only if captchaValue is provided and secret key exists)
+    if (captchaValue && process.env.RECAPTCHA_SECRET_KEY) {
+      const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+      const response = await fetch(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaValue}`,
+        {
+          method: 'POST',
+        }
+      );
+      const captchaData = await response.json();
+
+      if (!captchaData.success) {
+        return res.status(400).json({ error: 'reCAPTCHA verification failed' });
       }
-    );
-    const captchaData = await response.json();
-
-    if (!captchaData.success) {
-      return res.status(400).json({ error: 'reCAPTCHA verification failed' });
     }
 
     // Ensure subject is set
@@ -43,7 +47,9 @@ export default async function handler(
         name,
         email,
         subject: finalSubject,
-        message
+        message,
+        preferred_contact_time: preferred_contact_time || null,
+        preferred_contact_method: preferred_contact_method || null
       }
     ]);
 
