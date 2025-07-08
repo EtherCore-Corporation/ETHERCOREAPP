@@ -27,9 +27,9 @@ const techStack = [
 
 const TechStack: React.FC = () => {
   return (
-    <div className="py-20 px-4">
+    <div className="px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-12 items-center justify-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 md:gap-12 items-center justify-center">
           {techStack.map((tech) => {
             const IconComponent = tech.icon;
             return (

@@ -11,8 +11,10 @@ interface WhatsappButtonProps {
 
 const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>('447700900123');
+  const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
+    setMounted(true);
     console.log('🟢 WhatsApp Button mounted, variant:', variant);
     
     async function fetchWhatsappNumber() {
@@ -42,7 +44,7 @@ const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) =
     }
 
     fetchWhatsappNumber();
-  }, []);
+  }, [variant]);
 
   const messageText = 'Hello! I am interested in your digital solutions and would like to know more about your services. Could you provide me with more information?';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageText)}`;
@@ -68,6 +70,10 @@ const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) =
   }
 
   // Fixed variant with beautiful aesthetics + working fixed positioning
+  if (!mounted) {
+    return null; // Prevent hydration mismatch for fixed positioning
+  }
+
   return (
     <div 
       style={{
@@ -86,9 +92,10 @@ const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) =
         cursor: 'pointer',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         border: '2px solid rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(10px)'
+        backdropFilter: 'blur(10px)',
+        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
       }}
-      className="hover:scale-110 hover:rotate-3 animate-pulse"
+
       onClick={() => {
         console.log('🟢 WhatsApp button clicked!');
         window.open(whatsappUrl, '_blank');

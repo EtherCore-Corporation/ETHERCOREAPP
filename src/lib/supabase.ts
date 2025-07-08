@@ -78,9 +78,23 @@ export interface Service {
   description: string;
   icon_url: string;
   created_at: string;
-  feature1?: string;
-  feature2?: string;
-  feature3?: string;
+  // Features (from screenshot)
+  features1?: string;
+  features2?: string;
+  features3?: string;
+  // SEO fields (from screenshot)
+  meta_title?: string;
+  meta_description?: string;
+  slug?: string;
+  service_category?: string;
+  price_range?: string;
+  is_featured?: boolean;
+  structured_data?: Record<string, unknown>;
+  // CTA fields (new database columns)
+  cta_text?: string;
+  cta_url?: string;
+  // Campaign integration
+  campaign_url?: string; // Link to campaign pages like /campaign-seo, /campaign-web, etc.
 }
 
 export interface Contact {

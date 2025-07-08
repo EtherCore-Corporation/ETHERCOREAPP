@@ -7,14 +7,20 @@ import ContactForm from './ContactForm';
 const PopupContact = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasAutoOpened, setHasAutoOpened] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   console.log('🔵 PopupContact mounted, isOpen:', isOpen);
+
+  // Initialize mounted state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auto-open functionality
   useEffect(() => {
     if (hasAutoOpened) return;
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout | null = null;
     let scrollTriggered = false;
 
     // Function to open popup
@@ -46,7 +52,7 @@ const PopupContact = () => {
       
       if (scrollPercentage > 0.5) {
         scrollTriggered = true;
-        clearTimeout(timeoutId);
+        if (timeoutId) clearTimeout(timeoutId);
         openPopup();
       }
     };
@@ -56,7 +62,7 @@ const PopupContact = () => {
 
     // Cleanup
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       window.removeEventListener('scroll', handleScroll);
     };
   }, [hasAutoOpened, isOpen]);
@@ -125,114 +131,120 @@ const PopupContact = () => {
 
   return (
     <>
-      {/* Fixed Contact Button with beautiful aesthetics + working fixed positioning */}
-      <div 
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 999999,
-          width: '56px',
-          height: '56px',
-          background: 'linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%)',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 8px 32px rgba(45, 212, 191, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)',
-          cursor: 'pointer',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          border: '2px solid rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)'
-        }}
-        className="hover:scale-110 hover:rotate-3 animate-pulse"
-        onClick={() => {
-          console.log('🔵 Contact button clicked!');
-          setIsOpen(true);
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.1) rotate(-3deg)';
-          e.currentTarget.style.boxShadow = '0 12px 40px rgba(45, 212, 191, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-          e.currentTarget.style.boxShadow = '0 8px 32px rgba(45, 212, 191, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)';
-        }}
-        title="Contact us"
-      >
-        <MessageSquare 
-          style={{ 
-            width: '28px', 
-            height: '28px', 
-            color: 'white',
-            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
-          }} 
-        />
-      </div>
-
-      {/* Popup Modal */}
-      {isOpen && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999999,
-            padding: '16px'
-          }}
-        >
+      {/* Only render after mounting to prevent hydration mismatch */}
+      {mounted && (
+        <>
+          {/* Fixed Contact Button with beautiful aesthetics + working fixed positioning */}
           <div 
             style={{
-              backgroundColor: '#0d2231',
-              borderRadius: '12px',
-              padding: '24px',
-              width: '100%',
-              maxWidth: '640px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              position: 'relative'
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              zIndex: 999999,
+              width: '56px',
+              height: '56px',
+              background: 'linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 32px rgba(45, 212, 191, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)',
+              cursor: 'pointer',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              border: '2px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
             }}
+
+            onClick={() => {
+              console.log('🔵 Contact button clicked!');
+              setIsOpen(true);
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1) rotate(-3deg)';
+              e.currentTarget.style.boxShadow = '0 12px 40px rgba(45, 212, 191, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+              e.currentTarget.style.boxShadow = '0 8px 32px rgba(45, 212, 191, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)';
+            }}
+            title="Contact us"
           >
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                console.log('🔵 Close button clicked!');
-                setIsOpen(false);
-              }}
+            <MessageSquare 
+              style={{ 
+                width: '28px', 
+                height: '28px', 
+                color: 'white',
+                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+              }} 
+            />
+          </div>
+
+          {/* Popup Modal */}
+          {isOpen && (
+            <div 
               style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                color: '#9ca3af',
-                cursor: 'pointer',
-                fontSize: '24px'
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 9999999,
+                padding: '16px'
               }}
             >
-              <X style={{ width: '24px', height: '24px' }} />
-            </button>
+              <div 
+                style={{
+                  backgroundColor: '#0d2231',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  width: '100%',
+                  maxWidth: '640px',
+                  maxHeight: '90vh',
+                  overflowY: 'auto',
+                  position: 'relative'
+                }}
+              >
+                {/* Close Button */}
+                <button
+                  onClick={() => {
+                    console.log('🔵 Close button clicked!');
+                    setIsOpen(false);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#9ca3af',
+                    cursor: 'pointer',
+                    fontSize: '24px'
+                  }}
+                >
+                  <X style={{ width: '24px', height: '24px' }} />
+                </button>
 
-            {/* Header */}
-            <div style={{ marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
-                Get In Touch
-              </h2>
-              <p style={{ color: '#9ca3af' }}>
-                Ready to transform your business? Let's discuss your project.
-              </p>
+                {/* Header */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+                    Get In Touch
+                  </h2>
+                  <p style={{ color: '#9ca3af' }}>
+                    Ready to transform your business? Let&apos;s discuss your project.
+                  </p>
+                </div>
+
+                {/* Contact Form */}
+                <ContactForm />
+              </div>
             </div>
-
-            {/* Contact Form */}
-            <ContactForm />
-          </div>
-        </div>
+          )}
+        </>
       )}
     </>
   );

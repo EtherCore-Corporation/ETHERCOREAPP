@@ -6,6 +6,9 @@ import { getSeoMetadataWithRevalidation, generateMetadata as generateSeoMetadata
 import { generatePageSchema } from "@/lib/schema-utils";
 import BlogClient from "@/components/BlogClient";
 
+// Force fresh data on every request
+export const revalidate = 0;
+
 // ✅ Dynamic SEO metadata from database
 export async function generateMetadata(): Promise<Metadata> {
   const seoData = await getSeoMetadataWithRevalidation('/blog');

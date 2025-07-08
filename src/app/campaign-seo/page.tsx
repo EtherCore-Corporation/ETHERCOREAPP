@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { supabase } from "@/lib/supabase";
 import { getHeroSectionWithRevalidation } from "@/lib/hero-utils";
 import { getCompanyInfoWithRevalidation } from "@/lib/company-utils";
@@ -10,7 +10,7 @@ import SemPromoSection from '@/components/SemPromoSection';
 import dynamic from 'next/dynamic';
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, CheckCircle, Code2 } from "lucide-react";
+import { Calendar, CheckCircle, Code2, ChevronRight, Home } from "lucide-react";
 
 // Dynamic imports for performance
 const CampaignSEO = dynamic(() => import('@/components/CampaignSEO'), {
@@ -21,7 +21,15 @@ const ContactForm = dynamic(() => import('@/components/ContactForm'), {
   loading: () => <div className="h-64 bg-gray-800/50 animate-pulse rounded-lg" />,
 });
 
-
+// Separate viewport export
+export function generateViewport(): Viewport {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  };
+}
 
 // SEO metadata for campaign page
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,49 +40,50 @@ export async function generateMetadata(): Promise<Metadata> {
     .eq('is_active', true)
     .single();
 
-  const title = campaignVideo?.meta_title || "SEO Services - Boost Your Search Rankings | EtherCore";
-  const description = campaignVideo?.meta_description || "Professional SEO optimization services to improve your search rankings and drive organic traffic. Get your free SEO audit today.";
-  const keywords = campaignVideo?.video_keywords || "SEO optimization, search engine optimization, digital marketing, organic traffic, search rankings, SEO audit, keyword research, local SEO";
+  const title = campaignVideo?.meta_title || "SEO Services UK - Boost Search Rankings & Drive Organic Traffic | EtherCore";
+  const description = campaignVideo?.meta_description || "Professional SEO optimization services in the UK. Improve your search rankings, drive organic traffic, and grow your business with our expert SEO strategies. Free SEO audit included - technical SEO, keyword research, local SEO, and link building services.";
+  const keywords = campaignVideo?.video_keywords || "SEO services UK, search engine optimization, SEO agency London, digital marketing, organic traffic, search rankings, SEO audit, keyword research, local SEO, technical SEO, link building, Google SEO, SEO consultant, website optimization, on-page SEO, off-page SEO";
   const imageUrl = campaignVideo?.video_thumbnail_url || "https://www.ether-core.com/android-chrome-512x512.png";
 
   return {
     title,
     description,
     keywords,
-    authors: [{ name: "EtherCore Team" }],
+    authors: [{ name: "EtherCore SEO Team" }],
     creator: "EtherCore",
     publisher: "EtherCore",
+    category: "SEO Services",
     formatDetection: {
       email: false,
       address: false,
       telephone: false,
     },
-    viewport: {
-      width: 'device-width',
-      initialScale: 1,
-      maximumScale: 5,
-      userScalable: true,
-    },
     openGraph: {
-      title,
-      description,
+      title: title,
+      description: description,
       url: "https://ether-core.com/campaign-seo",
-      siteName: "EtherCore",
+      siteName: "EtherCore - SEO Services",
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: "EtherCore SEO Services - Dominate Search Rankings",
+          alt: "EtherCore SEO Services - Professional Search Engine Optimization",
+        },
+        {
+          url: "https://www.ether-core.com/android-chrome-512x512.png",
+          width: 512,
+          height: 512,
+          alt: "EtherCore Logo - SEO Agency",
         },
       ],
       type: 'website',
-      locale: 'en_US',
+      locale: 'en_GB',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
-      description,
+      title: title,
+      description: description,
       images: [imageUrl],
       creator: '@EtherCore',
       site: '@EtherCore',
@@ -92,6 +101,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       canonical: 'https://ether-core.com/campaign-seo',
+      languages: {
+        'en-GB': 'https://ether-core.com/campaign-seo',
+        'en-US': 'https://ether-core.com/campaign-seo',
+      },
     },
     other: {
       'mobile-web-app-capable': 'yes',
@@ -99,9 +112,10 @@ export async function generateMetadata(): Promise<Metadata> {
       'apple-mobile-web-app-status-bar-style': 'black-translucent',
       'theme-color': '#059669',
       'msapplication-TileColor': '#059669',
-      'application-name': 'EtherCore',
-      'apple-mobile-web-app-title': 'EtherCore',
+      'application-name': 'EtherCore SEO',
+      'apple-mobile-web-app-title': 'EtherCore SEO',
       'format-detection': 'telephone=no',
+      'google-site-verification': process.env.GOOGLE_SITE_VERIFICATION || '',
     },
   };
 }
@@ -154,11 +168,14 @@ async function getData() {
   }
 }
 
+// Force fresh data on every request
+export const revalidate = 0;
+
 export default async function CampaignSEOPage() {
   const { campaignVideo, portfolio, testimonials, services, hero, companyInfo, seoPromo, semPromo } = await getData();
   
   // Generate comprehensive schema markup for SEO campaign page
-  const schemas = [
+  const schemas: Record<string, unknown>[] = [
     // Organization Schema
     {
       "@context": "https://schema.org",
@@ -177,6 +194,40 @@ export default async function CampaignSEOPage() {
         "https://www.linkedin.com/company/ethercore",
         "https://twitter.com/ethercore"
       ]
+    },
+    // LocalBusiness Schema for SEO Services
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "EtherCore SEO Services",
+      "image": "https://www.ether-core.com/android-chrome-512x512.png",
+      "url": "https://ether-core.com/campaign-seo",
+      "telephone": "+44-7700-900123",
+      "priceRange": "£££",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "GB"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "51.5074",
+        "longitude": "-0.1278"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      },
+      "serviceArea": {
+        "@type": "GeoCircle",
+        "geoMidpoint": {
+          "@type": "GeoCoordinates",
+          "latitude": "51.5074",
+          "longitude": "-0.1278"
+        },
+        "geoRadius": "50000"
+      }
     },
     // Service Schema
     {
@@ -197,6 +248,64 @@ export default async function CampaignSEOPage() {
         "price": "0",
         "priceCurrency": "GBP"
       }
+    },
+    // FAQ Schema for SEO Services
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is included in a free SEO audit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our free SEO audit includes technical SEO analysis, keyword research, competitor analysis, content strategy recommendations, link building opportunities, and local SEO optimization. You'll receive a detailed report with actionable insights to improve your search rankings."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does it take to see SEO results?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SEO is a long-term strategy. You can typically expect to see initial improvements in 3-6 months, with significant results in 6-12 months. The timeline depends on your industry competition, current website state, and the scope of optimization work."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide local SEO services?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, we specialize in local SEO optimization including Google My Business optimization, local keyword targeting, local link building, and review management to help your business dominate local search results."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What makes EtherCore's SEO services different?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We combine technical SEO expertise with AI-powered tools and data-driven strategies. Our approach includes comprehensive audits, custom strategies, transparent reporting, and ongoing optimization to ensure sustainable growth in search rankings."
+          }
+        }
+      ]
+    },
+    // BreadcrumbList Schema
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://ether-core.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "SEO Services",
+          "item": "https://ether-core.com/campaign-seo"
+        }
+      ]
     },
     // VideoObject Schema (if video exists)
     ...(campaignVideo ? [{
@@ -233,28 +342,28 @@ export default async function CampaignSEOPage() {
     }
   ];
 
+  // Add video schema if available
+  if (campaignVideo?.video_schema) {
+    schemas.push(campaignVideo.video_schema as Record<string, unknown>);
+  }
+
+  // Add SEO promo schema if available
+  if (seoPromo && seoPromo.title && seoPromo.price_amount) {
+    schemas.push(generateSeoPromoSchema(seoPromo) as Record<string, unknown>);
+  }
+
+  // Add SEM promo schema if available
+  if (semPromo && semPromo.title && semPromo.setup_price_amount) {
+    schemas.push(generateSemPromoSchema(semPromo) as Record<string, unknown>);
+  }
+
   // Add existing schemas
   const existingSchemas = generatePageSchema('home', {
     companyInfo,
     hero,
     services,
     projects: portfolio
-  }) as any[];
-
-  // Add video schema if available
-  if (campaignVideo?.video_schema) {
-    schemas.push(campaignVideo.video_schema as any);
-  }
-
-  // Add SEO promo schema if available
-  if (seoPromo && seoPromo.title && seoPromo.price_amount) {
-    schemas.push(generateSeoPromoSchema(seoPromo) as any);
-  }
-
-  // Add SEM promo schema if available
-  if (semPromo && semPromo.title && semPromo.setup_price_amount) {
-    schemas.push(generateSemPromoSchema(semPromo) as any);
-  }
+  }) as Record<string, unknown>[];
 
   // Combine all schemas
   const allSchemas = [...schemas, ...existingSchemas];
@@ -283,7 +392,7 @@ export default async function CampaignSEOPage() {
         />
       ))}
 
-      <main>
+      <main className="min-h-screen pt-20">
         {/* Hero Section with Video */}
         <CampaignSEO campaignData={campaignVideo} />
 
@@ -292,8 +401,6 @@ export default async function CampaignSEOPage() {
 
         {/* SEM Promo Section - Database Driven */}
         <SemPromoSection initialData={semPromo} />
-
-
 
         {/* Project Highlights */}
         <section className="py-12 sm:py-16 md:py-20 px-4 bg-[#0d1424]">
@@ -498,6 +605,43 @@ export default async function CampaignSEOPage() {
                   <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                   Get Your Free SEO Audit
                 </Link>
+
+                {/* Internal Links Section */}
+                <div className="mt-8 pt-6 border-t border-green-500/20">
+                  <p className="text-gray-400 text-sm mb-4">Explore our other services:</p>
+                  <div className="flex flex-wrap justify-center gap-4 text-sm">
+                    <Link 
+                      href="/campaign-web" 
+                      className="text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline"
+                    >
+                      Web Development
+                    </Link>
+                    <Link 
+                      href="/campaign-automation" 
+                      className="text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline"
+                    >
+                      AI Automation
+                    </Link>
+                    <Link 
+                      href="/services" 
+                      className="text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline"
+                    >
+                      All Services
+                    </Link>
+                    <Link 
+                      href="/projects" 
+                      className="text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline"
+                    >
+                      Our Work
+                    </Link>
+                    <Link 
+                      href="/blog" 
+                      className="text-green-400 hover:text-green-300 transition-colors duration-300 hover:underline"
+                    >
+                      SEO Blog
+                    </Link>
+                  </div>
+                </div>
               </div>
 
               {/* Right Column - Contact Form */}

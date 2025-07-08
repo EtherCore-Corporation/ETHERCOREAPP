@@ -109,4 +109,95 @@ export function generateWebPromoSchema(promo: PromoWeb): Record<string, unknown>
       }
     }
   };
+}
+
+/**
+ * Fetch e-commerce promo data specifically (row 2 from promo_web)
+ */
+export async function getEcommercePromoData(): Promise<PromoWeb | null> {
+  try {
+    // First try to get the specific e-commerce package
+    const { data, error } = await supabase
+      .from('promo_web')
+      .select('*')
+      .eq('slug', 'ecommerce-package-800')
+      .limit(1);
+
+    if (error) {
+      console.error('Error fetching e-commerce promo data:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
+      // If table doesn't exist, log it but return null gracefully
+      if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+        console.log('promo_web table does not exist yet - using fallback data');
+        return null;
+      }
+      
+      return null;
+    }
+
+    // Return the first result if found
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error('Error in getEcommercePromoData:', error);
+    return null;
+  }
+}
+
+/**
+ * Get e-commerce promo data with revalidation for production
+ */
+export async function getEcommercePromoWithRevalidation(): Promise<PromoWeb | null> {
+  try {
+    const data = await getEcommercePromoData();
+    
+    // If database fetch fails, return null gracefully so the component uses fallback data
+    if (!data) {
+      console.log('No e-commerce promo data found, component will use fallback data');
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in getEcommercePromoWithRevalidation:', error);
+    return null;
+  }
+}
+
+/**
+ * Generate schema markup for e-commerce promo
+ */
+export function generateEcommercePromoSchema(promo: PromoWeb): Record<string, unknown> {
+  // Use existing schema_data if available, otherwise generate one
+  if (promo.schema_data) {
+    return promo.schema_data;
+  }
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "Offer",
+    "name": promo.title || "E-Commerce Solution",
+    "description": promo.subtitle || "Complete online store with payment integration",
+    "price": promo.price_amount?.toString() || "800",
+    "priceCurrency": promo.price_currency || "GBP",
+    "availability": "https://schema.org/InStock",
+    "validFrom": promo.created_at || new Date().toISOString(),
+    "seller": {
+      "@type": "Organization",
+      "name": "EtherCore",
+      "url": "https://ether-core.com"
+    },
+    "category": "E-Commerce Development Services",
+    "itemOffered": {
+      "@type": "Service",
+      "name": promo.title || "E-Commerce Solution",
+      "description": promo.subtitle || "Complete online store with payment integration",
+      "provider": {
+        "@type": "Organization",
+        "name": "EtherCore",
+        "url": "https://ether-core.com"
+      }
+    }
+  };
 } 

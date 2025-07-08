@@ -27,6 +27,25 @@ export async function GET() {
       changefreq: 'daily',
       priority: 0.8
     },
+    // Campaign Landing Pages - High Priority
+    {
+      url: `${baseUrl}/campaign-seo`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'weekly',
+      priority: 0.9
+    },
+    {
+      url: `${baseUrl}/campaign-web`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'weekly',
+      priority: 0.9
+    },
+    {
+      url: `${baseUrl}/campaign-automation`,
+      lastmod: new Date().toISOString(),
+      changefreq: 'weekly',
+      priority: 0.9
+    },
     {
       url: `${baseUrl}/contact`,
       lastmod: new Date().toISOString(),

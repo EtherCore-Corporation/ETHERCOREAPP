@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
 import { getHeroSectionWithRevalidation } from "@/lib/hero-utils";
 import { getCompanyInfoWithRevalidation } from "@/lib/company-utils";
@@ -5,7 +6,11 @@ import { getSeoMetadataWithRevalidation, generateMetadata as generateSeoMetadata
 import { generatePageSchema } from "@/lib/schema-utils";
 import { Brain, Code2, Search, Palette, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
-import { Metadata } from "next";
+import AutomationPromoSection from "@/components/AutomationPromoSection";
+
+// Force fresh data on every request and disable static optimization
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 // ✅ Dynamic SEO metadata from database
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,10 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // ✅ Icons Mapping
 const serviceIcons = {
-  "AI Automation": Brain,
-  "Modern Web Development": Code2,
-  "SEO Optimization": Search,
-  "UX/UI Design": Palette,
+  'AI Automation': Brain,
+  'Web Development': Code2,
+  'SEO Optimization': Search,
+  'UX/UI Design': Palette,
 };
 
 // ✅ Fetch services from Supabase (runs on server)
@@ -108,58 +113,85 @@ export default async function ServicesPage() {
                   className="group relative p-8 rounded-xl bg-gradient-to-br from-[#0d2231]/80 to-[#1a2438]/80 
                     backdrop-blur-sm hover:from-teal-600/20 hover:to-blue-600/20 transition-all duration-500
                     hover:shadow-[0_0_30px_rgba(45,212,191,0.2)] overflow-hidden border border-teal-500/10
-                    hover:border-teal-500/30 text-center"
+                    hover:border-teal-500/30 text-center flex flex-col h-full"
                 >
                   {/* Background Effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-teal-600/0 via-teal-600/5 to-blue-600/0 
                     opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   
-                  {/* Icon Container */}
-                  <div className="relative mb-8 inline-block">
-                    <div className="absolute inset-0 bg-teal-500/20 rounded-full blur-xl 
-                      group-hover:bg-teal-500/30 transition-all duration-500"></div>
-                    <div className="relative w-16 h-16 flex items-center justify-center 
-                      bg-gradient-to-br from-teal-500 to-blue-500 rounded-full
-                      group-hover:scale-110 transition-transform duration-500">
-                      {IconComponent && (
-                        <IconComponent className="w-8 h-8 text-white" />
-                      )}
+                  {/* Icon and Title Section - Same Line */}
+                  <div className="mb-6 h-16 flex items-center justify-center gap-4 flex-shrink-0">
+                    {/* Icon Container */}
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-teal-500/20 rounded-full blur-xl 
+                        group-hover:bg-teal-500/30 transition-all duration-500"></div>
+                      <div className="relative w-12 h-12 flex items-center justify-center 
+                        bg-gradient-to-br from-teal-500 to-blue-500 rounded-full
+                        group-hover:scale-110 transition-transform duration-500">
+                        {IconComponent && (
+                          <IconComponent className="w-6 h-6 text-white" />
+                        )}
+                      </div>
                     </div>
+                    
+                    {/* Title */}
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-teal-300 to-blue-400 
+                      bg-clip-text text-transparent group-hover:from-white group-hover:to-white
+                      transition-colors duration-300 leading-tight">
+                      {service.name}
+                    </h3>
                   </div>
 
                   {/* Content */}
-                  <div className="relative">
-                    <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-teal-300 to-blue-400 
-                      bg-clip-text text-transparent group-hover:from-white group-hover:to-white
-                      transition-colors duration-300">
-                      {service.name}
-                    </h3>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 mb-6">
-                      {service.description}
-                    </p>
+                  <div className="relative flex flex-col flex-grow">
+
+                    {/* Description Section - Fixed Height */}
+                    <div className="mb-6 h-20 flex items-center justify-center">
+                      <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 text-center w-full">
+                        {service.description}
+                      </p>
+                    </div>
                     
-                    {/* Features List */}
-                    <div className="space-y-4 mb-8">
-                      <div className="flex flex-col items-center">
+                    {/* Features List - Fixed Height */}
+                    <div className="mb-8 h-32 flex flex-col justify-start">
+                      <div className="flex flex-col items-center space-y-3">
                         {service.features1 && (
-                          <h3 className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-start">
-                            <Check className="w-5 h-5 text-teal-400 mr-2" />
-                            {service.features1}
-                          </h3>
+                          <div className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-start text-sm">
+                            <Check className="w-4 h-4 text-teal-400 mr-2 mt-0.5 flex-shrink-0" />
+                            <span>{service.features1}</span>
+                          </div>
                         )}
                         {service.features2 && (
-                          <h3 className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-start">
-                            <Check className="w-5 h-5 text-teal-400 mr-2" />
-                            {service.features2}
-                          </h3>
+                          <div className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-start text-sm">
+                            <Check className="w-4 h-4 text-teal-400 mr-2 mt-0.5 flex-shrink-0" />
+                            <span>{service.features2}</span>
+                          </div>
                         )}
                         {service.features3 && (
-                          <h3 className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-start">
-                            <Check className="w-5 h-5 text-teal-400 mr-2" />
-                            {service.features3}
-                          </h3>
+                          <div className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-start text-sm">
+                            <Check className="w-4 h-4 text-teal-400 mr-2 mt-0.5 flex-shrink-0" />
+                            <span>{service.features3}</span>
+                          </div>
                         )}
                       </div>
+                    </div>
+
+                    {/* CTA Section - Aligned at Bottom */}
+                    <div className="mt-auto relative z-20">
+                      {(service.cta_text && service.cta_url) && (
+                        <Link 
+                          href={service.cta_url}
+                          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg 
+                            bg-gradient-to-r from-teal-500/20 to-blue-500/20 
+                            border border-teal-500/30 text-teal-300 hover:text-white
+                            hover:from-teal-500/30 hover:to-blue-500/30 hover:border-teal-400/50
+                            transition-all duration-300 group font-medium
+                            cursor-pointer relative z-30"
+                        >
+                          <span>{service.cta_text}</span>
+                          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                        </Link>
+                      )}
                     </div>
                   </div>
 
@@ -172,6 +204,9 @@ export default async function ServicesPage() {
           </div>
         </div>
       </section>
+
+      {/* Automation Promo Section */}
+      <AutomationPromoSection />
 
       {/* ✅ CTA Section */}
       <section className="py-20 px-4">

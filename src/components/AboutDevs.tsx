@@ -142,7 +142,7 @@ const AboutDevs: React.FC = async () => {
               </h2>
             </div>
             <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto">
-              The passionate developers behind EtherCore's innovative digital solutions
+              The passionate developers behind EtherCore&apos;s innovative digital solutions
             </p>
           </header>
 
@@ -227,7 +227,7 @@ const AboutDevs: React.FC = async () => {
                       )}
                       
                       {/* Social Links */}
-                      <div className="flex justify-center gap-4" role="list" aria-label={`${developer.name}'s social media profiles`}>
+                      <div className="flex justify-center gap-4" role="list" aria-label={`${developer.name}&apos;s social media profiles`}>
                         {developer.linkedin_url && (
                           <Link
                             href={developer.linkedin_url}
@@ -236,7 +236,7 @@ const AboutDevs: React.FC = async () => {
                             className="p-2 rounded-lg bg-gradient-to-r from-teal-500/20 to-blue-500/20 
                               hover:from-teal-500/30 hover:to-blue-500/30 text-teal-400 hover:text-white
                               transition-all duration-300 hover:scale-110"
-                            aria-label={`${developer.name}'s LinkedIn profile`}
+                            aria-label={`${developer.name}&apos;s LinkedIn profile`}
                             itemProp="sameAs"
                           >
                             <Linkedin className="w-5 h-5" aria-hidden="true" />
@@ -266,7 +266,7 @@ const AboutDevs: React.FC = async () => {
                     <div 
                       className="flex flex-wrap gap-2 justify-center"
                       role="list"
-                      aria-label={`${developer.name}'s technical skills`}
+                      aria-label={`${developer.name}&apos;s technical skills`}
                     >
                       {developer.skills.map((skill, skillIndex) => (
                         <span

@@ -50,7 +50,7 @@ export async function getCampaignVideoWithRevalidation(pageSlug: string): Promis
 }
 
 // Generate VideoObject schema for campaign videos
-export function generateVideoObjectSchema(campaignVideo: CampaignVideo, companyInfo?: any): Record<string, unknown> {
+export function generateVideoObjectSchema(campaignVideo: CampaignVideo, companyInfo?: Record<string, unknown>): Record<string, unknown> {
   // Extract video ID from URL for additional metadata
   const getVideoId = (url: string) => {
     const match = url.match(/(?:youtube\.com\/embed\/|youtu\.be\/|youtube\.com\/watch\?v=)([^&\n?#]+)/);
@@ -86,7 +86,7 @@ export function generateVideoObjectSchema(campaignVideo: CampaignVideo, companyI
 }
 
 // Generate Service schema for campaign pages
-export function generateCampaignServiceSchema(companyInfo?: any): Record<string, unknown> {
+export function generateCampaignServiceSchema(companyInfo?: Record<string, unknown>): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -148,7 +148,7 @@ export function generateCampaignServiceSchema(companyInfo?: any): Record<string,
 }
 
 // Generate LocalBusiness schema for campaign pages
-export function generateCampaignLocalBusinessSchema(companyInfo?: any): Record<string, unknown> {
+export function generateCampaignLocalBusinessSchema(companyInfo?: Record<string, unknown>): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -201,7 +201,7 @@ export function generateCampaignLocalBusinessSchema(companyInfo?: any): Record<s
 // Generate comprehensive schema array for campaign pages
 export function generateCampaignSchemas(
   campaignVideo: CampaignVideo | null,
-  companyInfo?: any
+  companyInfo?: Record<string, unknown>
 ): Record<string, unknown>[] {
   const schemas = [];
 
@@ -237,4 +237,43 @@ export function generateVideoThumbnailUrl(videoUrl: string, customThumbnail?: st
   
   const videoId = extractYouTubeVideoId(videoUrl);
   return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
+}
+
+// Map service categories to campaign pages
+export function getServiceCampaignUrl(service: { service_category?: string; slug?: string }): string {
+  const categoryMappings: Record<string, string> = {
+    'SEO Services': '/campaign-seo',
+    'Web Development': '/campaign-web', 
+    'AI Automation': '/campaign-automation',
+    'Design Services': '/campaign-web' // UX/UI can go to web campaign
+  };
+
+  // Try exact category match first
+  if (service.service_category && categoryMappings[service.service_category]) {
+    return categoryMappings[service.service_category];
+  }
+
+  // Fallback: try to match by service name/slug
+  if (service.slug) {
+    if (service.slug.includes('seo')) return '/campaign-seo';
+    if (service.slug.includes('web') || service.slug.includes('design')) return '/campaign-web';
+    if (service.slug.includes('ai') || service.slug.includes('automation')) return '/campaign-automation';
+  }
+
+  // Default fallback
+  return '/contact';
+}
+
+// Generate CTA text based on service
+export function getServiceCtaText(service: { service_category?: string; name?: string }): string {
+  const ctaMappings: Record<string, string> = {
+    'SEO Services': 'Boost Your Rankings',
+    'Web Development': 'Build Your Website', 
+    'AI Automation': 'Automate Your Business',
+    'Design Services': 'Design Your Brand'
+  };
+
+  return service.service_category && ctaMappings[service.service_category] 
+    ? ctaMappings[service.service_category]
+    : 'Learn More';
 } 

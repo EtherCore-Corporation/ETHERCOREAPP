@@ -5,6 +5,7 @@ import { getSeoMetadataWithRevalidation, generateMetadata as generateSeoMetadata
 import { generatePageSchema } from "@/lib/schema-utils";
 import ContactForm from "@/components/ContactForm";
 import GridBackground from "@/components/GridBackground";
+import AboutDevs from "@/components/AboutDevs";
 import { Phone, Clock, Mail, MessageSquare } from "lucide-react";
 
 // ✅ Dynamic SEO metadata from database
@@ -159,6 +160,9 @@ export default async function ContactPage() {
           </div>
         </div>
       </section>
+
+      {/* About Developers Section */}
+      <AboutDevs />
     </main>
     </>
   );

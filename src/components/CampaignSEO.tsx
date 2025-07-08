@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Calendar, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 // Updated: Clean layout structure with mobile optimization
 
@@ -38,7 +39,7 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Default fallback data
@@ -61,18 +62,6 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
   };
 
   const data = campaignData || defaultData;
-
-  // Detect mobile device
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -130,18 +119,19 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
   };
 
   return (
-    <section className="relative min-h-screen pt-20 sm:pt-16 md:pt-20 pb-8 sm:pb-12 md:pb-20 px-4 bg-[#0a0f1a]">
+    <main className="relative min-h-screen pt-32 sm:pt-24 md:pt-28 pb-8 sm:pb-12 md:pb-20 px-4 bg-[#0a0f1a]" role="main">
       <div className="max-w-6xl mx-auto text-center text-white">
         {/* Clean Layout: Title → Video → Subtitle → CTAs */}
         {/* 1. Title - Mobile Optimized with extra top spacing */}
-        <div className="mb-8 sm:mb-12 mt-8 sm:mt-4">
+        <header className="mb-8 sm:mb-12 mt-8 sm:mt-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-green-300 to-emerald-400 bg-clip-text text-transparent leading-tight px-2">
             {data.header_text}
           </h1>
-        </div>
+        </header>
 
         {/* 2. Video - Mobile Optimized with Portrait Aspect Ratio */}
-        <div className="relative mb-8 sm:mb-12 max-w-full sm:max-w-4xl mx-auto">
+        <section aria-labelledby="campaign-video-heading" className="relative mb-8 sm:mb-12 max-w-full sm:max-w-4xl mx-auto">
+          <h2 id="campaign-video-heading" className="sr-only">SEO Campaign Video</h2>
           <div className="relative aspect-[9/16] sm:aspect-video rounded-lg sm:rounded-2xl overflow-hidden shadow-xl sm:shadow-2xl">
             <video
               ref={videoRef}
@@ -156,7 +146,11 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
               controls={isMobile}
               muted={data.muted}
               loop={data.loop_video}
+              aria-describedby="video-description"
             />
+            <div id="video-description" className="sr-only">
+              {data.meta_description || data.subtitle_text}
+            </div>
             
             {/* Video Controls Overlay - Hidden on mobile since we use native controls */}
             {!isMobile && (
@@ -166,6 +160,7 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
                     onClick={togglePlay}
                     className="group relative p-3 sm:p-4 bg-black/70 backdrop-blur-sm rounded-full border border-white/30 hover:border-white/60 transition-all duration-300 hover:bg-black/80"
                     title={isPlaying ? 'Pause Video' : 'Play Video'}
+                    aria-label={isPlaying ? 'Pause Video' : 'Play Video'}
                   >
                     {isPlaying ? (
                       <Pause className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
@@ -178,6 +173,7 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
                     onClick={toggleMute}
                     className="group relative p-3 sm:p-4 bg-black/70 backdrop-blur-sm rounded-full border border-white/30 hover:border-white/60 transition-all duration-300 hover:bg-black/80"
                     title={isMuted ? 'Unmute Video' : 'Mute Video'}
+                    aria-label={isMuted ? 'Unmute Video' : 'Mute Video'}
                   >
                     {isMuted ? (
                       <VolumeX className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
@@ -189,27 +185,29 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
               </div>
             )}
           </div>
-        </div>
+        </section>
 
         {/* 3. Subtitle - Mobile Optimized */}
-        <div className="mb-8 sm:mb-12 px-4">
+        <section className="mb-8 sm:mb-12 px-4">
           <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-200 max-w-4xl mx-auto leading-relaxed">
             {data.subtitle_text}
           </p>
-        </div>
+        </section>
 
         {/* 4. CTAs - Mobile Optimized */}
-        <div className="flex flex-col gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-12 px-4">
+        <section aria-labelledby="cta-heading" className="flex flex-col gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-12 px-4">
+          <h2 id="cta-heading" className="sr-only">Get Started with SEO Services</h2>
           {/* Primary CTA - SEO Audit */}
           <Link
             href={data.cta_button_url}
             target="_blank"
             rel="noopener noreferrer"
             className="group relative w-full max-w-md"
+            aria-label={`${data.cta_button_text} - Opens in new tab`}
           >
             <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl blur-lg opacity-70 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative px-8 py-4 bg-[#0a0f1a] rounded-2xl leading-none flex items-center justify-center space-x-3 group-hover:bg-[#0d1117] transition-all duration-300">
-              <Calendar className="w-5 h-5 text-green-400 group-hover:text-green-300" />
+              <Calendar className="w-5 h-5 text-green-400 group-hover:text-green-300" aria-hidden="true" />
               <span className="text-lg font-semibold text-white group-hover:text-green-100">
                 {data.cta_button_text}
               </span>
@@ -226,18 +224,19 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
                 const event = new CustomEvent('triggerPopup', { detail: { source: 'seo-campaign' } });
                 window.dispatchEvent(event);
               }}
+              aria-label={data.cta_button_text_2}
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition duration-1000"></div>
               <div className="relative px-8 py-4 bg-transparent border-2 border-green-500/30 rounded-2xl leading-none flex items-center justify-center space-x-3 group-hover:border-green-400/50 transition-all duration-300">
-                {data.cta_button_icon_2 === 'phone' && <Phone className="w-5 h-5 text-green-400 group-hover:text-green-300" />}
-                {data.cta_button_icon_2 === 'calendar' && <Calendar className="w-5 h-5 text-green-400 group-hover:text-green-300" />}
+                {data.cta_button_icon_2 === 'phone' && <Phone className="w-5 h-5 text-green-400 group-hover:text-green-300" aria-hidden="true" />}
+                {data.cta_button_icon_2 === 'calendar' && <Calendar className="w-5 h-5 text-green-400 group-hover:text-green-300" aria-hidden="true" />}
                 {data.cta_button_icon_2 === 'email' && (
-                  <svg className="w-5 h-5 text-green-400 group-hover:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-green-400 group-hover:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2v10a2 2 0 002 2z" />
                   </svg>
                 )}
                 {data.cta_button_icon_2 === 'contact' && (
-                  <svg className="w-5 h-5 text-green-400 group-hover:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-green-400 group-hover:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 )}
@@ -247,9 +246,19 @@ const CampaignSEO = ({ campaignData }: CampaignSEOProps) => {
               </div>
             </button>
           )}
-        </div>
+        </section>
       </div>
-    </section>
+
+      {/* Schema Markup for Video */}
+      {data.video_schema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(data.video_schema, null, 0)
+          }}
+        />
+      )}
+    </main>
   );
 };
 

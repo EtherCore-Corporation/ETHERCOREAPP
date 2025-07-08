@@ -8,6 +8,11 @@ import Image from "next/image";
 import { Code2, ExternalLink, Github } from "lucide-react";
 import GridBackground from "@/components/GridBackground";
 import Link from "next/link";
+import AutomationGallery from "@/components/AutomationGallery";
+
+// Force fresh data on every request and disable static optimization
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 // ✅ Dynamic SEO metadata from database
 export async function generateMetadata(): Promise<Metadata> {
@@ -193,6 +198,14 @@ export default async function ProjectsPage() {
           </div>
         </div>
       </section>
+
+      {/* Automation Gallery Section */}
+      <AutomationGallery 
+        sectionTitle="Automation Solutions in Action"
+        sectionSubtitle="See how we've transformed businesses with custom automation projects"
+        ctaText="Discuss Your Automation Ideas"
+        ctaUrl="https://calendly.com/ethercore/automation-consultation"
+      />
 
       {/* CTA Section */}
       <section className="py-20 px-4">

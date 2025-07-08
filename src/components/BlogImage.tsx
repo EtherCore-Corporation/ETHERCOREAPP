@@ -30,6 +30,7 @@ const BlogImage = ({
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-900/50">
         {isSVG ? (
           // SVG Handling - Use regular img tag for better SVG support
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={src}
             alt={alt || "Blog Image"}

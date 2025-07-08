@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Calendar, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 // Updated: Clean layout structure with mobile optimization
 
@@ -38,7 +39,7 @@ const CampaignWeb = ({ campaignData }: CampaignWebProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Default fallback data
@@ -62,17 +63,7 @@ const CampaignWeb = ({ campaignData }: CampaignWebProps) => {
 
   const data = campaignData || defaultData;
 
-  // Detect mobile device
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  // Mobile detection is now handled by useIsMobile hook
 
   useEffect(() => {
     const video = videoRef.current;
@@ -130,7 +121,7 @@ const CampaignWeb = ({ campaignData }: CampaignWebProps) => {
   };
 
   return (
-    <section className="relative min-h-screen pt-20 sm:pt-16 md:pt-20 pb-8 sm:pb-12 md:pb-20 px-4 bg-[#0a0f1a]">
+    <section className="relative min-h-screen pt-32 sm:pt-24 md:pt-28 pb-8 sm:pb-12 md:pb-20 px-4 bg-[#0a0f1a]">
       <div className="max-w-6xl mx-auto text-center text-white">
         {/* Clean Layout: Title → Video → Subtitle → CTAs */}
         {/* 1. Title - Mobile Optimized with extra top spacing */}

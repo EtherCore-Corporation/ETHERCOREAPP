@@ -1,14 +1,15 @@
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { supabase } from "@/lib/supabase";
 import { getHeroSectionWithRevalidation } from "@/lib/hero-utils";
 import { getCompanyInfoWithRevalidation } from "@/lib/company-utils";
 import { generatePageSchema } from "@/lib/schema-utils";
-import { getWebPromoWithRevalidation, generateWebPromoSchema } from "@/lib/promo-utils";
+import { getWebPromoWithRevalidation, generateWebPromoSchema, getEcommercePromoWithRevalidation } from "@/lib/promo-utils";
 import WebPromoSection from '@/components/WebPromoSection';
+import EcommercePromoSection from '@/components/EcommercePromoSection';
 import dynamic from 'next/dynamic';
 import Image from "next/image";
 import Link from "next/link";
-import { ExternalLink, Calendar, Phone, ArrowRight, CheckCircle, Code2 } from "lucide-react";
+import { CheckCircle, Code2, Calendar, ChevronRight, Home } from "lucide-react";
 
 // Dynamic imports for performance
 const CampaignWeb = dynamic(() => import('@/components/CampaignWeb'), {
@@ -23,32 +24,7 @@ const ContactForm = dynamic(() => import('@/components/ContactForm'), {
   loading: () => <div className="h-64 bg-gray-800/50 animate-pulse rounded-lg" />,
 });
 
-
-
-const GridBackground = dynamic(() => import('@/components/GridBackground'), {
-  loading: () => <div className="absolute inset-0 bg-gray-900/10" />,
-});
-
-interface CampaignVideo {
-  id: number;
-  page_slug: string;
-  video_url: string;
-  header_text: string;
-  subtitle_text: string;
-  cta_button_text: string;
-  cta_button_url: string;
-  video_duration?: number;
-  video_thumbnail_url?: string;
-  autoplay: boolean;
-  muted: boolean;
-  loop_video: boolean;
-  video_type: string;
-  priority: number;
-  meta_title?: string;
-  meta_description?: string;
-  video_schema?: Record<string, unknown>;
-  video_keywords?: string;
-}
+// CampaignVideo interface is imported from campaign-utils
 
 // SEO metadata for campaign page
 export async function generateMetadata(): Promise<Metadata> {
@@ -59,49 +35,50 @@ export async function generateMetadata(): Promise<Metadata> {
     .eq('is_active', true)
     .single();
 
-  const title = campaignVideo?.meta_title || "Transform Your Business with EtherCore - Free Consultation";
-  const description = campaignVideo?.meta_description || "Professional web development & AI automation services. Schedule your free consultation today and transform your digital presence.";
-  const keywords = campaignVideo?.video_keywords || "web development, AI automation, digital solutions, free consultation, EtherCore, custom websites, mobile apps, SEO optimization";
+  const title = campaignVideo?.meta_title || "Web Development UK - Custom Websites & Mobile Apps | EtherCore";
+  const description = campaignVideo?.meta_description || "Professional web development services in the UK. Custom websites, mobile applications, and e-commerce solutions. Free consultation included - modern technology stack, responsive design, SEO optimization, and ongoing support. Transform your business with expert web development.";
+  const keywords = campaignVideo?.video_keywords || "web development UK, website design London, custom websites, mobile app development, e-commerce development, responsive web design, Next.js development, React development, web applications, digital solutions, website maintenance, web developer, frontend development, backend development, full-stack development";
   const imageUrl = campaignVideo?.video_thumbnail_url || "https://www.ether-core.com/android-chrome-512x512.png";
 
   return {
     title,
     description,
     keywords,
-    authors: [{ name: "EtherCore Team" }],
+    authors: [{ name: "EtherCore Development Team" }],
     creator: "EtherCore",
     publisher: "EtherCore",
+    category: "Web Development",
     formatDetection: {
       email: false,
       address: false,
       telephone: false,
     },
-    viewport: {
-      width: 'device-width',
-      initialScale: 1,
-      maximumScale: 5,
-      userScalable: true,
-    },
     openGraph: {
-      title,
-      description,
+      title: title,
+      description: description,
       url: "https://ether-core.com/campaign-web",
-      siteName: "EtherCore",
+      siteName: "EtherCore - Web Development",
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: "EtherCore Web Development Services - Transform Your Business",
+          alt: "EtherCore Web Development - Custom Websites & Applications",
+        },
+        {
+          url: "https://www.ether-core.com/android-chrome-512x512.png",
+          width: 512,
+          height: 512,
+          alt: "EtherCore Logo - Web Development Agency",
         },
       ],
       type: 'website',
-      locale: 'en_US',
+      locale: 'en_GB',
     },
     twitter: {
       card: 'summary_large_image',
-      title,
-      description,
+      title: title,
+      description: description,
       images: [imageUrl],
       creator: '@EtherCore',
       site: '@EtherCore',
@@ -119,6 +96,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       canonical: 'https://ether-core.com/campaign-web',
+      languages: {
+        'en-GB': 'https://ether-core.com/campaign-web',
+        'en-US': 'https://ether-core.com/campaign-web',
+      },
     },
     other: {
       'mobile-web-app-capable': 'yes',
@@ -126,10 +107,21 @@ export async function generateMetadata(): Promise<Metadata> {
       'apple-mobile-web-app-status-bar-style': 'black-translucent',
       'theme-color': '#0d9488',
       'msapplication-TileColor': '#0d9488',
-      'application-name': 'EtherCore',
-      'apple-mobile-web-app-title': 'EtherCore',
+      'application-name': 'EtherCore Web',
+      'apple-mobile-web-app-title': 'EtherCore Web',
       'format-detection': 'telephone=no',
+      'google-site-verification': process.env.GOOGLE_SITE_VERIFICATION || '',
     },
+  };
+}
+
+// Separate viewport export
+export function generateViewport(): Viewport {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
   };
 }
 
@@ -143,7 +135,8 @@ async function getData() {
       { data: services },
       hero,
       companyInfo,
-      webPromo
+      webPromo,
+      ecommercePromo
     ] = await Promise.all([
       supabase.from('campaign_videos').select('*').eq('page_slug', 'campaign-web').eq('is_active', true).single(),
       supabase.from('portfolio').select('*').in('title', ['Mahonia Decor', 'BetterSelf', 'IndoMath']).order('created_at', { ascending: false }),
@@ -151,7 +144,8 @@ async function getData() {
       supabase.from('services').select('*').eq('is_active', true).order('created_at', { ascending: true }),
       getHeroSectionWithRevalidation('/campaign-web'),
       getCompanyInfoWithRevalidation(),
-      getWebPromoWithRevalidation()
+      getWebPromoWithRevalidation(),
+      getEcommercePromoWithRevalidation()
     ]);
 
     return {
@@ -161,7 +155,8 @@ async function getData() {
       services: services || [],
       hero,
       companyInfo,
-      webPromo
+      webPromo,
+      ecommercePromo
     };
   } catch (error) {
     console.error('Error fetching campaign data:', error);
@@ -172,16 +167,20 @@ async function getData() {
       services: [],
       hero: null,
       companyInfo: null,
-      webPromo: null
+      webPromo: null,
+      ecommercePromo: null
     };
   }
 }
 
+// Force fresh data on every request
+export const revalidate = 0;
+
 export default async function CampaignWebPage() {
-  const { campaignVideo, portfolio, testimonials, services, hero, companyInfo, webPromo } = await getData();
+  const { campaignVideo, portfolio, testimonials, services, hero, companyInfo, webPromo, ecommercePromo } = await getData();
   
   // Generate comprehensive schema markup for campaign page
-  const schemas = [
+  const schemas: Record<string, unknown>[] = [
     // Organization Schema
     {
       "@context": "https://schema.org",
@@ -200,6 +199,40 @@ export default async function CampaignWebPage() {
         "https://www.linkedin.com/company/ethercore",
         "https://twitter.com/ethercore"
       ]
+    },
+    // LocalBusiness Schema for Web Development Services
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "EtherCore Web Development",
+      "image": "https://www.ether-core.com/android-chrome-512x512.png",
+      "url": "https://ether-core.com/campaign-web",
+      "telephone": "+44-7700-900123",
+      "priceRange": "£££",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "GB"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "51.5074",
+        "longitude": "-0.1278"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      },
+      "serviceArea": {
+        "@type": "GeoCircle",
+        "geoMidpoint": {
+          "@type": "GeoCoordinates",
+          "latitude": "51.5074",
+          "longitude": "-0.1278"
+        },
+        "geoRadius": "50000"
+      }
     },
     // Service Schema
     {
@@ -220,6 +253,64 @@ export default async function CampaignWebPage() {
         "price": "0",
         "priceCurrency": "GBP"
       }
+    },
+    // FAQ Schema for Web Development Services
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What's included in the free consultation?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our free 30-minute consultation includes project scope analysis, technology recommendations, timeline estimation, cost breakdown, and strategic advice for your web development or AI automation project."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does it take to build a website?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Website development timeline varies based on complexity. A basic website takes 2-4 weeks, while complex applications with custom features can take 8-16 weeks. We provide detailed timelines during the consultation."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you provide ongoing support and maintenance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, we offer comprehensive maintenance packages including security updates, performance optimization, content updates, backup management, and technical support to keep your website running smoothly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What technologies do you use for web development?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We use modern technologies including Next.js, React, TypeScript, Node.js, Python, and cloud platforms like Vercel and AWS. We choose the best technology stack based on your specific project requirements."
+          }
+        }
+      ]
+    },
+    // BreadcrumbList Schema
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://ether-core.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Web Development",
+          "item": "https://ether-core.com/campaign-web"
+        }
+      ]
     },
     // VideoObject Schema (if video exists)
     ...(campaignVideo ? [{
@@ -262,16 +353,16 @@ export default async function CampaignWebPage() {
     hero,
     services,
     projects: portfolio
-  });
+  }) as Record<string, unknown>[];
 
   // Add video schema if available
   if (campaignVideo?.video_schema) {
-    schemas.push(campaignVideo.video_schema);
+    schemas.push(campaignVideo.video_schema as Record<string, unknown>);
   }
 
   // Add web promo schema if available
   if (webPromo && webPromo.title && webPromo.price_amount) {
-    schemas.push(generateWebPromoSchema(webPromo) as any);
+    schemas.push(generateWebPromoSchema(webPromo) as Record<string, unknown>);
   }
 
   // Combine all schemas
@@ -301,12 +392,15 @@ export default async function CampaignWebPage() {
         />
       ))}
 
-      <main>
+      <main className="min-h-screen pt-20">
         {/* Hero Section with Video */}
         <CampaignWeb campaignData={campaignVideo} />
 
         {/* Website Promo Section - Database Driven */}
         <WebPromoSection initialData={webPromo} />
+
+        {/* E-commerce Promo Section - Database Driven */}
+        <EcommercePromoSection initialData={ecommercePromo} />
 
         {/* Website Promo Section - Tech Stack */}
         <section className="py-12 sm:py-16 md:py-20 px-4 bg-[#0d1424] relative overflow-hidden">
@@ -527,6 +621,43 @@ export default async function CampaignWebPage() {
                   <Calendar className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                   Schedule Free Consultation
                 </Link>
+
+                {/* Internal Links Section */}
+                <div className="mt-8 pt-6 border-t border-teal-500/20">
+                  <p className="text-gray-400 text-sm mb-4">Explore our other services:</p>
+                  <div className="flex flex-wrap justify-center gap-4 text-sm">
+                    <Link 
+                      href="/campaign-seo" 
+                      className="text-teal-400 hover:text-teal-300 transition-colors duration-300 hover:underline"
+                    >
+                      SEO Services
+                    </Link>
+                    <Link 
+                      href="/campaign-automation" 
+                      className="text-teal-400 hover:text-teal-300 transition-colors duration-300 hover:underline"
+                    >
+                      AI Automation
+                    </Link>
+                    <Link 
+                      href="/services" 
+                      className="text-teal-400 hover:text-teal-300 transition-colors duration-300 hover:underline"
+                    >
+                      All Services
+                    </Link>
+                    <Link 
+                      href="/projects" 
+                      className="text-teal-400 hover:text-teal-300 transition-colors duration-300 hover:underline"
+                    >
+                      Portfolio
+                    </Link>
+                    <Link 
+                      href="/blog" 
+                      className="text-teal-400 hover:text-teal-300 transition-colors duration-300 hover:underline"
+                    >
+                      Web Dev Blog
+                    </Link>
+                  </div>
+                </div>
               </div>
 
               {/* Right Column - Contact Form */}

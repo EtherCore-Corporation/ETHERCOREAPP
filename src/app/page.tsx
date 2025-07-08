@@ -13,13 +13,7 @@ import {
   Palette,
   ArrowRight,
   Star,
-  CheckCircle,
   Calendar,
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Check,
   ExternalLink,
   Github
 } from 'lucide-react';
@@ -60,28 +54,68 @@ const serviceIcons = {
   'UX/UI Design': Palette,
 } as const;
 
-// ✅ Enhanced fetch function with error handling and retry logic
+// ✅ Dedicated fetch functions following working pages pattern
+async function getServices() {
+  const { data: services } = await supabase
+    .from('services')
+    .select('*')
+    .order('created_at', { ascending: true });
+  
+  return services || [];
+}
+
+async function getPortfolio() {
+  const { data: portfolio } = await supabase
+    .from('portfolio')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(6);
+  
+  return portfolio || [];
+}
+
+async function getTestimonials() {
+  const { data: testimonials } = await supabase
+    .from('testimonials')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(6);
+  
+  return testimonials || [];
+}
+
+async function getBlogs() {
+  const { data: blogs } = await supabase
+    .from('blogs')
+    .select('*')
+    .order('published_at', { ascending: false })
+    .limit(3);
+  
+  return blogs || [];
+}
+
+// ✅ Enhanced fetch function with consistent pattern matching working pages
 async function getData() {
   try {
     const [hero, services, portfolio, testimonials, blogs, companyInfo] = await Promise.all([
       getHeroSectionWithRevalidation('/'),
-      supabase.from('services').select('*').order('created_at', { ascending: true }),
-      supabase.from('portfolio').select('*').order('created_at', { ascending: false }).limit(6),
-      supabase.from('testimonials').select('*').order('created_at', { ascending: false }).limit(6),
-      supabase.from('blogs').select('*').order('published_at', { ascending: false }).limit(3),
+      getServices(),           // ✅ Using dedicated function
+      getPortfolio(),          // ✅ Using dedicated function  
+      getTestimonials(),       // ✅ Using dedicated function
+      getBlogs(),             // ✅ Using dedicated function
       getCompanyInfoWithRevalidation()
     ]);
 
     return {
       hero,
-      services: services.data || [],
-      portfolio: portfolio.data || [],
-      testimonials: testimonials.data || [],
-      blogs: blogs.data || [],
+      services,      // ✅ Direct return (no .data extraction needed)
+      portfolio,     // ✅ Direct return (no .data extraction needed)
+      testimonials,  // ✅ Direct return
+      blogs,         // ✅ Direct return
       companyInfo
     };
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error fetching homepage data:', error);
     return {
       hero: null,
       services: [],
@@ -152,10 +186,12 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-        </section>
 
-        {/* Tech Stack - New Section */}
-        <TechStack />
+          {/* TechStack - Blended into hero section */}
+          <div className="relative z-20 mt-16">
+            <TechStack />
+          </div>
+        </section>
 
         {/* Services */}
         <section className="py-20 px-4 bg-[#0d1424]">

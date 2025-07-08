@@ -14,13 +14,17 @@ interface NavigationProps {
 const Navigation = ({ ctaText = "Free Consultation" }: NavigationProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
+    setMounted(true);
+    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
 
+    handleScroll(); // Set initial state
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -35,7 +39,7 @@ const Navigation = ({ ctaText = "Free Consultation" }: NavigationProps) => {
   return (
     <nav
       className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
+        mounted && isScrolled
           ? "bg-[#0a0f1a]/80 backdrop-blur-md shadow-lg"
           : "bg-transparent"
       }`}

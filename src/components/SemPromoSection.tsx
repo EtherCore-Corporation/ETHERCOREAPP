@@ -37,13 +37,13 @@ export default function SemPromoSection({ initialData }: SemPromoSectionProps) {
   const data = initialData || fallbackData;
 
   return (
-    <section className="py-16 px-4 relative overflow-hidden">
+    <section className="py-16 px-4 relative overflow-hidden" role="region" aria-labelledby="sem-services-heading">
       {/* Background Effect */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10 opacity-30" />
       </div>
       
-      <div className="max-w-5xl mx-auto text-center relative z-10">
+      <article className="max-w-5xl mx-auto text-center relative z-10">
         {/* 1. Setup Price Tag */}
         <div className="inline-block mb-6 relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-full blur-xl opacity-70" />
@@ -54,51 +54,58 @@ export default function SemPromoSection({ initialData }: SemPromoSectionProps) {
           </div>
         </div>
 
-        {/* 2. Title */}
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-white">
-          {data.title}
-        </h2>
-        
-        {/* 3. Subtitle */}
-        <p className="text-gray-400 text-lg mb-10 max-w-3xl mx-auto">
-          {data.subtitle}
-        </p>
+        <header>
+          {/* 2. Title */}
+          <h3 id="sem-services-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-white">
+            {data.title}
+          </h3>
+          
+          {/* 3. Subtitle */}
+          <p className="text-gray-400 text-lg mb-10 max-w-3xl mx-auto">
+            {data.subtitle}
+          </p>
+        </header>
 
         {/* 4. Benefits Cards - 3 cards showing key benefits */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 max-w-4xl mx-auto">
-          {data.benefits.map((benefit, index) => (
-            <div 
-              key={index}
-              className="flex flex-col items-center p-6 rounded-xl bg-[#0d2231]/50 backdrop-blur-sm
-                border border-orange-500/10 hover:border-orange-500/30 transition-all duration-300
-                hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 text-center group"
-            >
-              {/* Icon */}
-              <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                {benefit.icon}
+        <section aria-labelledby="sem-benefits-heading" className="mb-10">
+          <h4 id="sem-benefits-heading" className="sr-only">SEM Service Benefits</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {data.benefits.map((benefit, index) => (
+              <div 
+                key={index}
+                className="flex flex-col items-center p-6 rounded-xl bg-[#0d2231]/50 backdrop-blur-sm
+                  border border-orange-500/10 hover:border-orange-500/30 transition-all duration-300
+                  hover:scale-105 hover:shadow-lg hover:shadow-orange-500/20 text-center group"
+                role="article"
+                aria-labelledby={`benefit-${index}-title`}
+              >
+                {/* Icon */}
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300" role="img" aria-label={benefit.title}>
+                  {benefit.icon}
+                </div>
+                
+                {/* Title */}
+                <h5 id={`benefit-${index}-title`} className="font-semibold text-orange-300 text-lg mb-2 group-hover:text-orange-200 transition-colors">
+                  {benefit.title}
+                </h5>
+                
+                {/* Description */}
+                <p className="text-gray-400 text-sm mb-3 group-hover:text-gray-300 transition-colors">
+                  {benefit.description}
+                </p>
+                
+                {/* Metric */}
+                <div className="mt-auto">
+                  <span className="inline-block px-3 py-1 bg-gradient-to-r from-orange-500/20 to-red-500/20 
+                    rounded-full text-orange-300 text-xs font-semibold border border-orange-500/30
+                    group-hover:from-orange-500/30 group-hover:to-red-500/30 transition-all duration-300">
+                    {benefit.metric}
+                  </span>
+                </div>
               </div>
-              
-              {/* Title */}
-              <h3 className="font-semibold text-orange-300 text-lg mb-2 group-hover:text-orange-200 transition-colors">
-                {benefit.title}
-              </h3>
-              
-              {/* Description */}
-              <p className="text-gray-400 text-sm mb-3 group-hover:text-gray-300 transition-colors">
-                {benefit.description}
-              </p>
-              
-              {/* Metric */}
-              <div className="mt-auto">
-                <span className="inline-block px-3 py-1 bg-gradient-to-r from-orange-500/20 to-red-500/20 
-                  rounded-full text-orange-300 text-xs font-semibold border border-orange-500/30
-                  group-hover:from-orange-500/30 group-hover:to-red-500/30 transition-all duration-300">
-                  {benefit.metric}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </section>
 
         {/* 5. Monthly Price */}
         <div className="mb-8">
@@ -125,6 +132,7 @@ export default function SemPromoSection({ initialData }: SemPromoSectionProps) {
             target="_blank"
             className="relative inline-flex items-center px-8 py-4 bg-[#0a0f1a] rounded-xl
               text-lg font-semibold overflow-hidden button-shine group"
+            aria-label={`${data.cta_button_text} - Opens in new tab`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-red-500/20 
               opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -139,6 +147,7 @@ export default function SemPromoSection({ initialData }: SemPromoSectionProps) {
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
+                aria-hidden="true"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -148,11 +157,13 @@ export default function SemPromoSection({ initialData }: SemPromoSectionProps) {
 
         {/* 7. Additional Info / Clarification */}
         {data.additional_info && (
-          <p className="text-gray-400 text-sm max-w-2xl mx-auto leading-relaxed">
-            {data.additional_info}
-          </p>
+          <footer>
+            <p className="text-gray-400 text-sm max-w-2xl mx-auto leading-relaxed">
+              {data.additional_info}
+            </p>
+          </footer>
         )}
-      </div>
+      </article>
     </section>
   );
 } 

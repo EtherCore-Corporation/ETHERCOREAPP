@@ -6,7 +6,7 @@ import Link from "next/link";
 // ✅ Icons Mapping
 const serviceIcons = {
   "AI Automation": Brain,
-  "Modern Web Development": Code2,
+  "Web Development": Code2,
   "SEO Optimization": Search,
   "UX/UI Design": Palette,
 };

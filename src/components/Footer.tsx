@@ -23,14 +23,34 @@ const Footer = async () => {
     { name: 'Projects', href: '/projects' }
   ];
 
-  const footerServices = services?.map((service: { name: string; slug?: string }) => ({
-    name: service.name,
-    href: `/services/${service.slug || service.name.toLowerCase().replace(/\s+/g, '-')}`
-  })) || [
-    { name: 'Web Development', href: '/services' },
-    { name: 'AI Automation', href: '/services' },
-    { name: 'SEO Optimization', href: '/services' },
-    { name: 'Digital Marketing', href: '/services' },
+  const footerServices = services?.map((service: { name: string; slug?: string }) => {
+    // Map services to their respective campaign pages
+    const getCampaignLink = (serviceName: string) => {
+      switch (serviceName.toLowerCase()) {
+        case 'web development':
+          return '/campaign-web';
+        case 'ai automation':
+          return '/campaign-automation';
+        case 'seo optimization':
+          return '/campaign-seo';
+        case 'digital marketing':
+          return '/campaign-seo';
+        case 'consultation':
+          return '/contact';
+        default:
+          return '/services';
+      }
+    };
+
+    return {
+      name: service.name,
+      href: getCampaignLink(service.name)
+    };
+  }) || [
+    { name: 'Web Development', href: '/campaign-web' },
+    { name: 'AI Automation', href: '/campaign-automation' },
+    { name: 'SEO Optimization', href: '/campaign-seo' },
+    { name: 'Digital Marketing', href: '/campaign-seo' },
     { name: 'Consultation', href: '/contact' }
   ];
 
