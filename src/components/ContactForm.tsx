@@ -132,10 +132,12 @@ export default function ContactForm() {
 
       {/* Subject Dropdown */}
       <div className="relative group">
+        <label htmlFor="subject" className="sr-only">Subject</label>
         <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500/20 to-blue-500/20 
           rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 
           group-hover:duration-200" />
         <select
+          id="subject"
           name="subject"
           required
           value={formData.subject}
@@ -197,10 +199,12 @@ export default function ContactForm() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Preferred Contact Method */}
         <div className="relative group">
+          <label htmlFor="preferred_contact_method" className="sr-only">Preferred Contact Method</label>
           <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500/20 to-blue-500/20 
             rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 
             group-hover:duration-200" />
           <select
+            id="preferred_contact_method"
             name="preferred_contact_method"
             value={formData.preferred_contact_method}
             onChange={(e) => setFormData({ ...formData, preferred_contact_method: e.target.value })}
@@ -220,10 +224,12 @@ export default function ContactForm() {
 
         {/* Preferred Contact Time */}
         <div className="relative group">
+          <label htmlFor="preferred_contact_time" className="sr-only">Preferred Contact Time</label>
           <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500/20 to-blue-500/20 
             rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 
             group-hover:duration-200" />
           <select
+            id="preferred_contact_time"
             name="preferred_contact_time"
             value={formData.preferred_contact_time}
             onChange={(e) => setFormData({ ...formData, preferred_contact_time: e.target.value })}

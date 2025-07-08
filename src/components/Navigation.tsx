@@ -81,7 +81,7 @@ const Navigation = ({ ctaText = "Free Consultation" }: NavigationProps) => {
             <div className="flex items-center space-x-3">
               <Link
                 href="/contact"
-                className="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors duration-300 whitespace-nowrap"
+                className="px-4 py-2 text-sm bg-teal-700 text-white rounded-lg hover:bg-teal-800 transition-colors duration-300 whitespace-nowrap"
               >
                 {ctaText}
               </Link>
@@ -95,6 +95,7 @@ const Navigation = ({ ctaText = "Free Consultation" }: NavigationProps) => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="relative group p-2 rounded-lg border border-teal-500/20 
                 hover:border-teal-500/40 transition-colors duration-300"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               <div
                 className="absolute inset-0 bg-gradient-to-r from-teal-600/10 to-blue-600/10 

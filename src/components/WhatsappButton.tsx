@@ -59,6 +59,7 @@ const WhatsappButton = ({ variant = 'fixed', size = 24 }: WhatsappButtonProps) =
         rel="noopener noreferrer"
         className="hover:opacity-80 transition-opacity"
         title="Contact us on WhatsApp"
+        aria-label="Contact us on WhatsApp"
       >
         <MessageCircle 
           className="text-teal-400 hover:text-teal-300 transition-colors" 
