@@ -9,7 +9,7 @@ import EcommercePromoSection from '@/components/EcommercePromoSection';
 import dynamic from 'next/dynamic';
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle, Code2, Calendar, ChevronRight, Home } from "lucide-react";
+import { CheckCircle, Code2, Calendar } from "lucide-react";
 
 // Dynamic imports for performance
 const CampaignWeb = dynamic(() => import('@/components/CampaignWeb'), {

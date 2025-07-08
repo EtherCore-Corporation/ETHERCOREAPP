@@ -24,11 +24,8 @@ export default function ContactForm() {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
   const [isLocalhost, setIsLocalhost] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
   // Check if running on localhost after component mounts
   useEffect(() => {
-    setMounted(true);
     setIsLocalhost(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   }, []);
 

@@ -10,7 +10,7 @@ import SemPromoSection from '@/components/SemPromoSection';
 import dynamic from 'next/dynamic';
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, CheckCircle, Code2, ChevronRight, Home } from "lucide-react";
+import { Calendar, CheckCircle, Code2 } from "lucide-react";
 
 // Dynamic imports for performance
 const CampaignSEO = dynamic(() => import('@/components/CampaignSEO'), {

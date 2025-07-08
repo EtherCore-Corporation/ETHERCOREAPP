@@ -8,7 +8,7 @@ import AutomationPromoSection from '@/components/AutomationPromoSection';
 import dynamic from 'next/dynamic';
 // Image import removed as it's not used in this component
 import Link from "next/link";
-import { Calendar, CheckCircle, ChevronRight, Home } from "lucide-react";
+import { Calendar, CheckCircle } from "lucide-react";
 
 // Dynamic imports for performance
 const CampaignAutomation = dynamic(() => import('@/components/CampaignAutomation'), {
