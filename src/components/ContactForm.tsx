@@ -33,12 +33,18 @@ export default function ContactForm() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const { data: servicesData } = await supabase
+        const { data: servicesData, error } = await supabase
           .from('services')
           .select('id, name, is_active')
           .eq('is_active', true)
           .order('display_order', { ascending: true });
         
+        if (error) {
+          console.error('Supabase error fetching services:', error);
+        }
+        if (!servicesData) {
+          console.warn('Supabase returned no data for services.');
+        }
         setServices(servicesData || []);
       } catch (error) {
         console.error('Error fetching services:', error);
