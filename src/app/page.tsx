@@ -15,7 +15,6 @@ import {
   Search, 
   Palette,
   ArrowRight,
-  Star,
   Calendar,
   ExternalLink,
   Github
