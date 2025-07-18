@@ -10,7 +10,7 @@ const Footer = async () => {
   // Fetch data from database
   const [companyInfo, { data: services }] = await Promise.all([
     getCompanyInfoWithRevalidation(),
-    supabase.from('services').select('name, slug').eq('is_active', true).limit(6).order('display_order', { ascending: true })
+    supabase.from('services').select('name, slug').eq('is_active', true).limit(6).order('created_at', { ascending: true })
   ]);
 
   // Static links

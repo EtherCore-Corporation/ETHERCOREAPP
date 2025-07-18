@@ -35,6 +35,8 @@ export default function WebPromoSection({ initialData }: WebPromoSectionProps) {
     created_by: 'fallback'
   };
 
+  // Only use fallback data if no initialData is provided at all
+  // If initialData exists but has empty fields, don't show those fields
   const data = initialData || fallbackData;
 
   return (
@@ -110,10 +112,10 @@ export default function WebPromoSection({ initialData }: WebPromoSectionProps) {
           </Link>
         </div>
 
-        {/* Additional Info */}
-        {data.additional_info && (
+        {/* Additional Info - Only show if data comes from database and has content */}
+        {initialData && initialData.additional_info && (
           <p className="mt-4 text-gray-400 text-xs">
-            {data.additional_info}
+            {initialData.additional_info}
           </p>
         )}
       </div>

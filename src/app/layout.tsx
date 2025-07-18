@@ -66,6 +66,52 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* ✅ Service Worker Cleanup Script - Completely removes any existing service workers */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            // Immediately unregister any existing service workers
+            if ('serviceWorker' in navigator) {
+              // Clear all service worker registrations
+              navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                  registration.unregister();
+                  console.log('Service worker unregistered');
+                }
+              });
+              
+              // Clear service worker cache
+              if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                  return Promise.all(
+                    cacheNames.map(function(cacheName) {
+                      if (cacheName.includes('sw') || cacheName.includes('service-worker')) {
+                        console.log('Deleting cache:', cacheName);
+                        return caches.delete(cacheName);
+                      }
+                    })
+                  );
+                });
+              }
+              
+              // Prevent future service worker registrations
+              navigator.serviceWorker.register = function() {
+                console.log('Service worker registration blocked');
+                return Promise.reject(new Error('Service workers are disabled'));
+              };
+              
+              // Override fetch to block sw.js requests
+              const originalFetch = window.fetch;
+              window.fetch = function(url, options) {
+                if (typeof url === 'string' && url.includes('/sw.js')) {
+                  console.log('Blocked sw.js fetch request');
+                  return Promise.reject(new Error('Service worker requests blocked'));
+                }
+                return originalFetch.call(this, url, options);
+              };
+            }
+          `
+        }} />
+        
         {/* ✅ Enhanced preconnect for better performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -135,25 +181,6 @@ export default function RootLayout({
         <Footer />
         <WhatsappButton variant="fixed" />
         <PopupContact />
-        
-        {/* ✅ Optimized Service Worker Registration */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator && 'requestIdleCallback' in window) {
-                requestIdleCallback(() => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch((error) => {
-                      console.log('SW registration failed: ', error);
-                    });
-                });
-              }
-            `,
-          }}
-        />
       </body>
     </html>
   );

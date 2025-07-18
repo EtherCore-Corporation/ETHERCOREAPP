@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabase';
 interface Service {
   id: string;
   name: string;
-  is_active: boolean;
 }
 
 export default function ContactForm() {
@@ -33,14 +32,22 @@ export default function ContactForm() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
+        console.log('Attempting to fetch services from Supabase...');
+        
         const { data: servicesData, error } = await supabase
           .from('services')
-          .select('id, name, is_active')
-          .eq('is_active', true)
-          .order('display_order', { ascending: true });
+          .select('id, name');
+        
+        console.log('Supabase response:', { data: servicesData, error });
         
         if (error) {
           console.error('Supabase error fetching services:', error);
+          console.error('Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
         }
         if (!servicesData) {
           console.warn('Supabase returned no data for services.');
@@ -48,6 +55,8 @@ export default function ContactForm() {
         setServices(servicesData || []);
       } catch (error) {
         console.error('Error fetching services:', error);
+        console.error('Error type:', typeof error);
+        console.error('Error stringified:', JSON.stringify(error, null, 2));
         // Keep empty array as fallback
       } finally {
         setIsLoadingServices(false);
