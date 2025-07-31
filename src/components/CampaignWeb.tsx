@@ -122,18 +122,18 @@ const CampaignWeb = ({ campaignData }: CampaignWebProps) => {
 
   return (
     <section className="relative min-h-screen pt-32 sm:pt-24 md:pt-28 pb-8 sm:pb-12 md:pb-20 px-4 bg-[#0a0f1a]">
-      <div className="max-w-6xl mx-auto text-center text-white">
-        {/* Clean Layout: Title → Video → Subtitle → CTAs */}
-        {/* 1. Title - Mobile Optimized with extra top spacing */}
-        <div className="mb-8 sm:mb-12 mt-8 sm:mt-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-teal-300 to-blue-400 bg-clip-text text-transparent leading-tight px-2">
+      <div className="max-w-4xl mx-auto text-center text-white">
+        {/* Optimized Layout for 9:16 Video: Title → Video → Subtitle → CTAs */}
+        {/* 1. Title - Optimized for vertical video layout */}
+        <div className="mb-6 sm:mb-8 mt-8 sm:mt-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-teal-300 to-blue-400 bg-clip-text text-transparent leading-tight px-2">
             {data.header_text}
           </h1>
         </div>
 
-        {/* 2. Video - Mobile Optimized with Portrait Aspect Ratio */}
-        <div className="relative mb-8 sm:mb-12 max-w-full sm:max-w-4xl mx-auto">
-          <div className="relative aspect-[9/16] sm:aspect-video rounded-lg sm:rounded-2xl overflow-hidden shadow-xl sm:shadow-2xl">
+        {/* 2. Video - Optimized for 9:16 format on all devices */}
+        <div className="relative mb-8 sm:mb-12 max-w-full sm:max-w-2xl mx-auto">
+          <div className="relative aspect-[9/16] rounded-lg sm:rounded-2xl overflow-hidden shadow-xl sm:shadow-2xl">
             <video
               ref={videoRef}
               src={data.video_url}
@@ -182,15 +182,15 @@ const CampaignWeb = ({ campaignData }: CampaignWebProps) => {
           </div>
         </div>
 
-        {/* 3. Subtitle - Mobile Optimized */}
-        <div className="mb-8 sm:mb-12 px-4">
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-200 max-w-4xl mx-auto leading-relaxed">
+        {/* 3. Subtitle - Optimized for vertical video layout */}
+        <div className="mb-6 sm:mb-8 px-4">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
             {data.subtitle_text}
           </p>
         </div>
 
-        {/* 4. CTAs - Mobile Optimized */}
-        <div className="flex flex-col gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-12 px-4">
+        {/* 4. CTAs - Optimized for vertical video layout */}
+        <div className="flex flex-col gap-4 sm:gap-6 justify-center items-center mb-6 sm:mb-8 px-4">
           {/* Primary CTA - Calendly */}
           <Link
             href={data.cta_button_url}
